@@ -2,12 +2,20 @@ import { type Page, expect } from '@playwright/test';
 
 import { LoginPage } from '../../locators/login_page';
 
+const isLoggedIn = async (page: Page): Promise<boolean> =>
+  LoginPage.accountMenu(page).isVisible().catch(() => false);
+
 /**
  * Open a link in the Playwright browser page and verify that the Keycloak
  * login page is displayed.
  */
 export const openBrowser = async (page: Page, link: string): Promise<void> => {
   await page.goto(link);
+
+  if (await isLoggedIn(page)) {
+    return;
+  }
+
   await expect(LoginPage.brand(page)).toContainText(/osac/i);
   await expect(LoginPage.pageTitle(page)).toBeVisible();
 };
@@ -22,6 +30,10 @@ export const openAndLogin = async (
   password: string,
 ): Promise<void> => {
   await openBrowser(page, link);
+
+  if (await isLoggedIn(page)) {
+    return;
+  }
 
   await LoginPage.username(page).fill(username);
   await LoginPage.signIn(page).click();

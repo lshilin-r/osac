@@ -6,4 +6,5 @@ export const LoginPage = {
   username: (page: Page) => page.getByLabel('Username or email'),
   password: (page: Page) => page.locator('input[type="password"]'),
   signIn: (page: Page) => page.getByRole('button', { name: 'Sign In' }),
+  accountMenu: (page: Page) => page.getByRole('button', { name: 'Account menu' }),
 };
