@@ -26,6 +26,22 @@ export const openAndLogin = async (
   await LoginPage.username(page).fill(username);
   await LoginPage.signIn(page).click();
 
-  await LoginPage.password(page).fill(password);
+  // The first Keycloak may broker to a second Keycloak, which can present
+  // another username screen before showing the password field.
+  const usernameField = LoginPage.username(page);
+  const passwordField = LoginPage.password(page);
+  await Promise.race([
+    usernameField.waitFor({ state: 'visible' }).catch(() => {}),
+    passwordField.waitFor({ state: 'visible' }).catch(() => {}),
+  ]);
+  if (await usernameField.isVisible().catch(() => false)) {
+    await usernameField.fill(username);
+    if (!(await passwordField.isVisible().catch(() => false))) {
+      await LoginPage.signIn(page).click();
+      await passwordField.waitFor({ state: 'visible' });
+    }
+  }
+
+  await passwordField.fill(password);
   await LoginPage.signIn(page).click();
 };
