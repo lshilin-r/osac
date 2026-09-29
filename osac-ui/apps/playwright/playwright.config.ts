@@ -72,7 +72,7 @@ export default defineConfig({
       testMatch: /auth\.setup\.ts/,
       // Traces record fill() arguments — never trace the project that types the
       // real Keycloak password, even if a future CI run retries it.
-      use: { ...devices['Desktop Chrome'], trace: 'off' },
+      use: { ...devices['Desktop Chrome'], trace: 'off', video: 'off' },
     },
     {
       name: 'smoke',
