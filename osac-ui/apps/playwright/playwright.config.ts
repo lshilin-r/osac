@@ -91,7 +91,7 @@ export default defineConfig({
       name: 'vmaas',
       testDir: vmaasDir,
       testMatch: /.*\.spec\.ts/,
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome'], trace: 'off' },
     },
   ],
 });
