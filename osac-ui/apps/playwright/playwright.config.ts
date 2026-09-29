@@ -34,7 +34,7 @@ if (parsedBaseURL.username || parsedBaseURL.password) {
 // package, instead of relying on everyone remembering src/*.spec.ts is ignored.
 const scratchDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'scratch');
 fs.mkdirSync(scratchDir, { recursive: true });
-const vmaasDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'e2e-tests/vmaas');
+const vmaasDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../e2e-tests/vmaas');
 
 // Video recording is opt-in via PW_VIDEO=on (default off) — handy for debugging
 // a flow by watching the recording afterwards. PW_SLOW_MO adds a per-action
