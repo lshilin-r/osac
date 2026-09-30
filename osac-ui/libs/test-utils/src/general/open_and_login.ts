@@ -1,6 +1,6 @@
 import { type Page, expect } from '@playwright/test';
 
-import { LoginPage } from '../../locators/login_page';
+import { LoginPage } from '../../../locators/login_page';
 
 const isLoggedIn = async (page: Page): Promise<boolean> =>
   LoginPage.accountMenu(page)
