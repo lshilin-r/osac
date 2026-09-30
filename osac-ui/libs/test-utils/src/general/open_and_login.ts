@@ -59,5 +59,6 @@ export const openAndLogin = async (
   await passwordField.fill(password);
   await LoginPage.signIn(page).click();
 
+  await expect(LoginPage.accountMenu(page)).toBeVisible();
   await expect(LoginPage.osacLogo(page)).toBeVisible();
 };

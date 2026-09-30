@@ -7,5 +7,5 @@ export const LoginPage = {
   password: (page: Page) => page.locator('input[type="password"]'),
   signIn: (page: Page) => page.getByRole('button', { name: 'Sign In' }),
   accountMenu: (page: Page) => page.getByRole('button', { name: 'Account menu' }),
-  osacLogo: (page: Page) => page.locator('svg.injected-svg[data-src^="/assets/RH-OSAC-"]'),
+  osacLogo: (page: Page) => page.locator('svg.injected-svg[data-src*="RH-OSAC"]'),
 };
