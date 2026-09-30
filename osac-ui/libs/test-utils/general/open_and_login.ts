@@ -3,7 +3,9 @@ import { type Page, expect } from '@playwright/test';
 import { LoginPage } from '../../locators/login_page';
 
 const isLoggedIn = async (page: Page): Promise<boolean> =>
-  LoginPage.accountMenu(page).isVisible().catch(() => false);
+  LoginPage.accountMenu(page)
+    .isVisible()
+    .catch(() => false);
 
 /**
  * Open a link in the Playwright browser page and verify that the Keycloak
@@ -56,4 +58,6 @@ export const openAndLogin = async (
 
   await passwordField.fill(password);
   await LoginPage.signIn(page).click();
+
+  await expect(LoginPage.osacLogo(page)).toBeVisible();
 };
