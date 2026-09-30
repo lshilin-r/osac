@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { AUTH_FILE } from './auth-file';
+import { LoginPage } from '../../../libs/locators/login_page';
 
 setup('authenticate', async ({ page }) => {
   const username = process.env.OSAC_USERNAME;
@@ -49,6 +50,7 @@ setup('authenticate', async ({ page }) => {
   await page.getByRole('button', { name: 'Sign In' }).click();
 
   await expect(page.getByRole('button', { name: 'Account menu' })).toBeVisible();
+  await expect(LoginPage.osacLogo(page)).toBeVisible();
 
   // Harden the .auth directory before storageState writes into it — AUTH_FILE
   // holds a live, real Keycloak session cookie, and creating the dir with
