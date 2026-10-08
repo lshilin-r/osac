@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { openAndLogin } from '../../../libs/test-utils/src/general/open_and_login';
+import { openAndLogin } from '../../../../libs/test-utils/src/general/open_and_login';
 
 test('logs into the OSAC UI', async ({ page }) => {
   const username = process.env.OSAC_USERNAME;
