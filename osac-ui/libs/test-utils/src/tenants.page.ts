@@ -1,0 +1,110 @@
+import { type Page, expect } from '@playwright/test';
+import { mkdtemp, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { TenantsCreatePage, TenantsCredentialsPage, TenantsMainPage } from '../../locators/tenants';
+
+const defaultTenantNames = ['shared', 'system'] as const;
+
+const exactText = (value: string): RegExp =>
+  new RegExp(`^\\s*${value.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}\\s*$`);
+
+/** Open the tenant creation page and verify its title. */
+export const openCreateTenantPage = async (page: Page): Promise<void> => {
+  const createTenant = page.getByRole(...TenantsMainPage.createTenant);
+  await expect(createTenant).toBeVisible();
+  await createTenant.click();
+
+  await expect(page.getByRole(...TenantsCreatePage.createPageTitle)).toBeVisible();
+};
+
+/** Fill and submit the tenant creation form. */
+export const createTenant = async (
+  page: Page,
+  tenantName: string,
+  domainName = '',
+): Promise<string> => {
+  // Enter the required tenant name.
+  await page.getByLabel(...TenantsCreatePage.name).fill(tenantName);
+
+  if (domainName) {
+    // Add the optional domain field and enter the supplied domain.
+    await page.getByRole(...TenantsCreatePage.addDomain).click();
+    const domain = page.getByLabel(...TenantsCreatePage.domain);
+    await expect(domain).toBeVisible();
+    await domain.fill(domainName);
+  }
+
+  // Submit the tenant creation form.
+  await page.getByRole(...TenantsCreatePage.create).click();
+
+  // Verify that the break-glass credentials dialog is displayed.
+  const credentialsDialog = page.getByRole(...TenantsCredentialsPage.breakGlassDialog);
+  await expect(credentialsDialog).toBeVisible();
+  await expect(
+    credentialsDialog.getByText(...TenantsCredentialsPage.breakGlassWarning),
+  ).toBeVisible();
+
+  // Verify that both generated credentials are present and non-empty.
+  const copyableInputs = credentialsDialog.getByRole(...TenantsCredentialsPage.copyableInput);
+  await expect(copyableInputs).toHaveCount(2);
+
+  const username = copyableInputs.nth(0);
+  const password = copyableInputs.nth(1);
+  await expect(username).toHaveValue(/.+/);
+  await expect(password).toHaveValue(/.+/);
+
+  // Save the generated credentials in a tenant-specific temporary file.
+  const safeTenantName = tenantName.replace(/[^a-zA-Z0-9._-]/g, '_') || 'tenant';
+  const temporaryDirectory = await mkdtemp(join(tmpdir(), `osac-${safeTenantName}-`));
+  const credentialsFile = join(temporaryDirectory, `${safeTenantName}-break-glass-credentials.txt`);
+  await writeFile(
+    credentialsFile,
+    [
+      `Tenant: ${tenantName}`,
+      `Username: ${await username.inputValue()}`,
+      `Password: ${await password.inputValue()}`,
+      '',
+    ].join('\n'),
+    { encoding: 'utf8', mode: 0o600 },
+  );
+
+  // Close the credentials dialog and return to the Tenants main page.
+  await page.getByRole(...TenantsCredentialsPage.savedCredentials).click();
+  await expect(page.getByRole(...TenantsMainPage.pageTitle)).toBeVisible();
+
+  // Locate the newly created tenant row by its exact tenant name.
+  const tenantRows = page
+    .getByRole(...TenantsMainPage.tenantsTable)
+    .locator(...TenantsMainPage.tenantRows);
+  const tenantNameCell = tenantRows
+    .locator(...TenantsMainPage.tenantNameCell)
+    .filter({ hasText: exactText(tenantName) });
+  await expect(tenantNameCell).toHaveCount(1);
+
+  // Verify that the new tenant is synced and, when supplied, has the expected domain.
+  const tenantRow = tenantNameCell.locator('..');
+  await expect(tenantRow.locator(...TenantsMainPage.tenantStatusCell)).toHaveText('Synced');
+  if (domainName) {
+    await expect(tenantRow.locator(...TenantsMainPage.tenantPrimaryDomainCell)).toHaveText(
+      exactText(domainName),
+    );
+  }
+
+  return credentialsFile;
+};
+
+/** Verify that the default shared and system tenants are synced. */
+export const expectDefaultTenants = async (page: Page): Promise<void> => {
+  const tenantsTable = page.getByRole(...TenantsMainPage.tenantsTable);
+  const tenantRows = tenantsTable.locator(...TenantsMainPage.tenantRows);
+
+  await expect(tenantRows).toHaveCount(defaultTenantNames.length);
+
+  for (const tenantName of defaultTenantNames) {
+    const tenantRow = tenantRows.filter({ hasText: new RegExp(`\\b${tenantName}\\b`) });
+    await expect(tenantRow).toHaveCount(1);
+    await expect(tenantRow.locator(...TenantsMainPage.tenantStatusCell)).toHaveText('Synced');
+  }
+};
