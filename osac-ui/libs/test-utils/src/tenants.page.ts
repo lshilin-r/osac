@@ -112,7 +112,7 @@ export const expectDefaultTenants = async (page: Page): Promise<void> => {
   await expect(tenantRows).toHaveCount(defaultTenantNames.length);
 
   for (const tenantName of defaultTenantNames) {
-    const tenantRow = tenantRows.filter({ hasText: new RegExp(`\\b${tenantName}\\b`) });
+    const tenantRow = getTenantRow(page, tenantName);
     await expect(tenantRow).toHaveCount(1);
     await expect(tenantRow.locator(...TenantsMainPage.tenantStatusCell)).toHaveText('Synced');
   }
