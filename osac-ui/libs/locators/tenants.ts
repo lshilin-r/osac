@@ -1,6 +1,6 @@
 type TenantsLocator =
   | readonly [
-      role: 'link' | 'button' | 'heading' | 'textbox' | 'grid' | 'group' | 'dialog',
+      role: 'link' | 'button' | 'heading' | 'textbox' | 'grid' | 'group' | 'dialog' | 'menuitem',
       options: { name: string; exact: true },
     ]
   | readonly [label: string];
@@ -14,6 +14,7 @@ export const TenantsMainPage = {
   tenantNameCell: ['td[data-label="Tenant"]'],
   tenantStatusCell: ['td[data-label="Status"]'],
   tenantPrimaryDomainCell: ['td[data-label="Primary domain"]'],
+  tenantActionsToggle: ['button[aria-label^="Actions for "]'],
 } as const satisfies Record<string, TenantsLocator>;
 
 export const TenantsCreatePage = {
@@ -32,4 +33,14 @@ export const TenantsCredentialsPage = {
   breakGlassWarning: ['Save these credentials now — they cannot be retrieved later.'],
   copyableInput: ['textbox', { name: 'Copyable input', exact: true }],
   savedCredentials: ['button', { name: 'I have saved the credentials', exact: true }],
+} as const satisfies Record<string, TenantsLocator>;
+
+export const TenantsDeletePage = {
+  deleteMenuItem: ['menuitem', { name: 'Delete', exact: true }],
+  deleteDialog: ['[role="dialog"][aria-labelledby="delete-confirm-title"]'],
+  deleteTitle: ['#delete-confirm-title'],
+  deleteWarning: [
+    'This permanently deletes the tenant and all its resources. This action cannot be undone.',
+  ],
+  deleteButton: ['button', { name: 'Delete', exact: true }],
 } as const satisfies Record<string, TenantsLocator>;

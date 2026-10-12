@@ -3,7 +3,12 @@ import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { TenantsCreatePage, TenantsCredentialsPage, TenantsMainPage } from '../../locators/tenants';
+import {
+  TenantsCreatePage,
+  TenantsCredentialsPage,
+  TenantsDeletePage,
+  TenantsMainPage,
+} from '../../locators/tenants';
 
 const defaultTenantNames = ['shared', 'system'] as const;
 
@@ -107,4 +112,34 @@ export const expectDefaultTenants = async (page: Page): Promise<void> => {
     await expect(tenantRow).toHaveCount(1);
     await expect(tenantRow.locator(...TenantsMainPage.tenantStatusCell)).toHaveText('Synced');
   }
+};
+
+/** Delete a tenant and verify that its row disappears from the Tenants page. */
+export const deleteTenant = async (page: Page, tenantName: string): Promise<void> => {
+  // Locate the tenant row by its exact name.
+  const tenantRows = page
+    .getByRole(...TenantsMainPage.tenantsTable)
+    .locator(...TenantsMainPage.tenantRows);
+  const tenantNameCell = tenantRows
+    .locator(...TenantsMainPage.tenantNameCell)
+    .filter({ hasText: exactText(tenantName) });
+  await expect(tenantNameCell).toHaveCount(1);
+
+  // Open the tenant actions menu and select Delete.
+  const tenantRow = tenantNameCell.locator('..');
+  await tenantRow.locator(...TenantsMainPage.tenantActionsToggle).click();
+  await page.getByRole(...TenantsDeletePage.deleteMenuItem).click();
+
+  // Verify the delete dialog, tenant-specific title, and warning text.
+  const deleteDialog = page.locator(...TenantsDeletePage.deleteDialog);
+  await expect(deleteDialog).toBeVisible();
+  await expect(deleteDialog.locator(...TenantsDeletePage.deleteTitle)).toContainText(
+    `Delete ${tenantName}?`,
+  );
+  await expect(deleteDialog.getByText(...TenantsDeletePage.deleteWarning)).toBeVisible();
+
+  // Confirm deletion and wait for the dialog and tenant row to disappear.
+  await deleteDialog.getByRole(...TenantsDeletePage.deleteButton).click();
+  await expect(deleteDialog).toBeHidden();
+  await expect(tenantNameCell).toHaveCount(0, { timeout: 60_000 });
 };

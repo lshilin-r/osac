@@ -9,6 +9,9 @@ import {
 } from '../../../../libs/test-utils/src/tenants.page';
 
 test('creates a tenant from the Administration tenants page', async ({ page }) => {
+  // Allow backend reconciliation and tenant deletion waits to complete.
+  test.setTimeout(120_000);
+
   const username = process.env.OSAC_USERNAME;
   const password = process.env.OSAC_PASSWORD;
   if (!username || !password) {
@@ -27,5 +30,4 @@ test('creates a tenant from the Administration tenants page', async ({ page }) =
   // 4. Open the tenant creation page and create tenant2.
   await openCreateTenantPage(page);
   await createTenant(page, 'tenant2');
-
 });
