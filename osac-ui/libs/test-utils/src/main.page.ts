@@ -48,11 +48,7 @@ export const openMainPageOption = async (page: Page, option: MainPageOption): Pr
 
 /** Open the Tenants page from the Administration section and verify its title. */
 export const openTenantsPage = async (page: Page): Promise<void> => {
-  await openSection(page, 'administration');
-
-  const tenantsOption = getMainPageLocator(page, 'tenants');
-  await expect(tenantsOption).toBeVisible();
-  await tenantsOption.click();
+  await openMainPageOption(page, 'tenants');
 
   await expect(page.getByRole(...TenantsMainPage.pageTitle)).toBeVisible();
 };

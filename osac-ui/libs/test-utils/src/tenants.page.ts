@@ -1,4 +1,4 @@
-import { type Page, expect } from '@playwright/test';
+import { type Locator, type Page, expect } from '@playwright/test';
 import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -14,6 +14,16 @@ const defaultTenantNames = ['shared', 'system'] as const;
 
 const exactText = (value: string): RegExp =>
   new RegExp(`^\\s*${value.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}\\s*$`);
+
+const getTenantRow = (page: Page, tenantName: string): Locator => {
+  const tenantRows = page
+    .getByRole(...TenantsMainPage.tenantsTable)
+    .locator(...TenantsMainPage.tenantRows);
+  const tenantNameCell = tenantRows
+    .locator(...TenantsMainPage.tenantNameCell)
+    .filter({ hasText: exactText(tenantName) });
+  return tenantNameCell.locator('..');
+};
 
 /** Open the tenant creation page and verify its title. */
 export const openCreateTenantPage = async (page: Page): Promise<void> => {
@@ -80,16 +90,10 @@ export const createTenant = async (
   await expect(page.getByRole(...TenantsMainPage.pageTitle)).toBeVisible();
 
   // Locate the newly created tenant row by its exact tenant name.
-  const tenantRows = page
-    .getByRole(...TenantsMainPage.tenantsTable)
-    .locator(...TenantsMainPage.tenantRows);
-  const tenantNameCell = tenantRows
-    .locator(...TenantsMainPage.tenantNameCell)
-    .filter({ hasText: exactText(tenantName) });
-  await expect(tenantNameCell).toHaveCount(1);
+  const tenantRow = getTenantRow(page, tenantName);
+  await expect(tenantRow).toHaveCount(1);
 
   // Verify that the new tenant is synced and, when supplied, has the expected domain.
-  const tenantRow = tenantNameCell.locator('..');
   await expect(tenantRow.locator(...TenantsMainPage.tenantStatusCell)).toHaveText('Synced');
   if (domainName) {
     await expect(tenantRow.locator(...TenantsMainPage.tenantPrimaryDomainCell)).toHaveText(
@@ -117,16 +121,10 @@ export const expectDefaultTenants = async (page: Page): Promise<void> => {
 /** Delete a tenant and verify that its row disappears from the Tenants page. */
 export const deleteTenant = async (page: Page, tenantName: string): Promise<void> => {
   // Locate the tenant row by its exact name.
-  const tenantRows = page
-    .getByRole(...TenantsMainPage.tenantsTable)
-    .locator(...TenantsMainPage.tenantRows);
-  const tenantNameCell = tenantRows
-    .locator(...TenantsMainPage.tenantNameCell)
-    .filter({ hasText: exactText(tenantName) });
-  await expect(tenantNameCell).toHaveCount(1);
+  const tenantRow = getTenantRow(page, tenantName);
+  await expect(tenantRow).toHaveCount(1);
 
   // Open the tenant actions menu and select Delete.
-  const tenantRow = tenantNameCell.locator('..');
   await tenantRow.locator(...TenantsMainPage.tenantActionsToggle).click();
   await page.getByRole(...TenantsDeletePage.deleteMenuItem).click();
 
@@ -141,5 +139,5 @@ export const deleteTenant = async (page: Page, tenantName: string): Promise<void
   // Confirm deletion and wait for the dialog and tenant row to disappear.
   await deleteDialog.getByRole(...TenantsDeletePage.deleteButton).click();
   await expect(deleteDialog).toBeHidden();
-  await expect(tenantNameCell).toHaveCount(0, { timeout: 60_000 });
+  await expect(tenantRow).toHaveCount(0, { timeout: 60_000 });
 };
