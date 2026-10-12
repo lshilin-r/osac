@@ -63,3 +63,14 @@ export const openAndLogin = async (
   await expect(page.getByRole(...LoginPage.accountMenu)).toBeVisible();
   await expect(page.locator(...LoginPage.osacLogo)).toBeVisible();
 };
+
+/** Open the login page and authenticate with the configured test user. */
+export const openAndLoginWithEnvironment = async (page: Page, link: string): Promise<void> => {
+  const username = process.env.OSAC_USERNAME;
+  const password = process.env.OSAC_PASSWORD;
+  if (!username || !password) {
+    throw new Error('OSAC_USERNAME and OSAC_PASSWORD must be set to a valid Keycloak test user.');
+  }
+
+  await openAndLogin(page, link, username, password);
+};

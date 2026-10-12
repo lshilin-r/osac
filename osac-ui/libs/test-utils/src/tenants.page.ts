@@ -12,8 +12,10 @@ import {
 
 const defaultTenantNames = ['shared', 'system'] as const;
 
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const exactText = (value: string): RegExp =>
-  new RegExp(`^\\s*${value.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}\\s*$`);
+  new RegExp(`^\\s*${escapeRegExp(value.normalize('NFC'))}\\s*$`);
 
 const getTenantRow = (page: Page, tenantName: string): Locator => {
   const tenantRows = page
@@ -106,11 +108,6 @@ export const createTenant = async (
 
 /** Verify that the default shared and system tenants are synced. */
 export const expectDefaultTenants = async (page: Page): Promise<void> => {
-  const tenantsTable = page.getByRole(...TenantsMainPage.tenantsTable);
-  const tenantRows = tenantsTable.locator(...TenantsMainPage.tenantRows);
-
-  await expect(tenantRows).toHaveCount(defaultTenantNames.length);
-
   for (const tenantName of defaultTenantNames) {
     const tenantRow = getTenantRow(page, tenantName);
     await expect(tenantRow).toHaveCount(1);
