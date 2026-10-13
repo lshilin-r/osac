@@ -27,6 +27,17 @@ const getTenantRow = (page: Page, tenantName: string): Locator => {
   return tenantNameCell.locator('..');
 };
 
+const getTenantNames = async (page: Page): Promise<string[]> =>
+  (
+    await page
+      .getByRole(...TenantsMainPage.tenantsTable)
+      .locator(...TenantsMainPage.tenantRows)
+      .locator(...TenantsMainPage.tenantNameCell)
+      .allTextContents()
+  )
+    .map((tenantName) => tenantName.trim())
+    .filter(Boolean);
+
 /** Open the tenant creation page and verify its title. */
 export const openCreateTenantPage = async (page: Page): Promise<void> => {
   const createTenant = page.getByRole(...TenantsMainPage.createTenant);
@@ -34,6 +45,31 @@ export const openCreateTenantPage = async (page: Page): Promise<void> => {
   await createTenant.click();
 
   await expect(page.getByRole(...TenantsCreatePage.createPageTitle)).toBeVisible();
+};
+
+/** Verify that a tenant row appears and return it for further checks. */
+export const expectTenantToExist = async (
+  page: Page,
+  tenantName: string,
+  timeout = 15_000,
+): Promise<Locator> => {
+  const tenantRow = getTenantRow(page, tenantName);
+  await expect(tenantRow).toHaveCount(1, { timeout });
+  return tenantRow;
+};
+
+/** Verify that the requested tenant is not already present on the Tenants page. */
+export const expectTenantNotToExist = async (page: Page, tenantName: string): Promise<void> => {
+  const tenantRow = getTenantRow(page, tenantName);
+  try {
+    await expectTenantToExist(page, tenantName, 3_000);
+  } catch {
+    if ((await tenantRow.count()) === 0) {
+      return;
+    }
+  }
+
+  throw new Error(`Cannot create tenant "${tenantName}": a tenant with this name already exists.`);
 };
 
 /** Fill and submit the tenant creation form. */
@@ -92,8 +128,7 @@ export const createTenant = async (
   await expect(page.getByRole(...TenantsMainPage.pageTitle)).toBeVisible();
 
   // Locate the newly created tenant row by its exact tenant name.
-  const tenantRow = getTenantRow(page, tenantName);
-  await expect(tenantRow).toHaveCount(1);
+  const tenantRow = await expectTenantToExist(page, tenantName);
 
   // Verify that the new tenant is synced and, when supplied, has the expected domain.
   await expect(tenantRow.locator(...TenantsMainPage.tenantStatusCell)).toHaveText('Synced');
@@ -118,8 +153,27 @@ export const expectDefaultTenants = async (page: Page): Promise<void> => {
 /** Delete a tenant and verify that its row disappears from the Tenants page. */
 export const deleteTenant = async (page: Page, tenantName: string): Promise<void> => {
   // Locate the tenant row by its exact name.
-  const tenantRow = getTenantRow(page, tenantName);
-  await expect(tenantRow).toHaveCount(1);
+  let tenantRow: Locator;
+  try {
+    tenantRow = await expectTenantToExist(page, tenantName, 3_000);
+  } catch {
+    const matchingRows = await getTenantRow(page, tenantName).count();
+    const availableTenantNames = await getTenantNames(page);
+    const availableTenants = availableTenantNames.length
+      ? availableTenantNames.map((name) => `"${name}"`).join(', ')
+      : 'none';
+
+    if (matchingRows === 0) {
+      throw new Error(
+        `Cannot delete tenant "${tenantName}": no matching tenant was found. ` +
+          `Available tenants: ${availableTenants}. Check OSAC_TENANT_NAME or create the tenant first.`,
+      );
+    }
+
+    throw new Error(
+      `Cannot delete tenant "${tenantName}": found ${matchingRows} matching rows; expected exactly one.`,
+    );
+  }
 
   // Open the tenant actions menu and select Delete.
   await tenantRow.locator(...TenantsMainPage.tenantActionsToggle).click();
@@ -136,5 +190,19 @@ export const deleteTenant = async (page: Page, tenantName: string): Promise<void
   // Confirm deletion and wait for the dialog and tenant row to disappear.
   await deleteDialog.getByRole(...TenantsDeletePage.deleteButton).click();
   await expect(deleteDialog).toBeHidden();
-  await expect(tenantRow).toHaveCount(0, { timeout: 60_000 });
+  try {
+    await expect(tenantRow).toHaveCount(0, { timeout: 60_000 });
+  } catch {
+    const remainingRows = await tenantRow.count();
+    const currentStatus =
+      remainingRows === 1
+        ? ((await tenantRow.locator(...TenantsMainPage.tenantStatusCell).textContent())?.trim() ??
+          'unknown')
+        : 'unknown';
+
+    throw new Error(
+      `Tenant "${tenantName}" was not removed from the Tenants table within 60 seconds ` +
+        `after deletion. The row is still present with status "${currentStatus}".`,
+    );
+  }
 };

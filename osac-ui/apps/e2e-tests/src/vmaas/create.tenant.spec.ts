@@ -5,6 +5,7 @@ import { openTenantsPage } from '../../../../libs/test-utils/src/main.page';
 import {
   createTenant,
   expectDefaultTenants,
+  expectTenantNotToExist,
   openCreateTenantPage,
 } from '../../../../libs/test-utils/src/tenants.page';
 
@@ -27,7 +28,10 @@ test('creates a tenant from the Administration tenants page', async ({ page }) =
   // 3. Verify that the default tenants exist and are synced.
   await expectDefaultTenants(page);
 
-  // 4. Open the tenant creation page and create the requested tenant.
+  // 4. Verify that the requested tenant does not already exist.
+  await expectTenantNotToExist(page, tenantName);
+
+  // 5. Open the tenant creation page and create the requested tenant.
   await openCreateTenantPage(page);
   const credentialsFile = await createTenant(page, tenantName);
   process.env.OSAC_TENANT_CREDENTIALS_FILE = credentialsFile;
