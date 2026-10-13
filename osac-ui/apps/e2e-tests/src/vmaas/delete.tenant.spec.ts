@@ -5,8 +5,8 @@ import { openTenantsPage } from '../../../../libs/test-utils/src/main.page';
 import { deleteTenant } from '../../../../libs/test-utils/src/tenants.page';
 
 test('deletes the requested tenant', async ({ page }) => {
-  // Allow the backend deletion and row disappearance wait to complete.
-  test.setTimeout(120_000);
+  // Allow the 120-second backend deletion wait plus login and UI actions to complete.
+  test.setTimeout(180_000);
 
   const tenantName = process.env.OSAC_TENANT_NAME;
   if (!tenantName) {

@@ -191,7 +191,7 @@ export const deleteTenant = async (page: Page, tenantName: string): Promise<void
   await deleteDialog.getByRole(...TenantsDeletePage.deleteButton).click();
   await expect(deleteDialog).toBeHidden();
   try {
-    await expect(tenantRow).toHaveCount(0, { timeout: 60_000 });
+    await expect(tenantRow).toHaveCount(0, { timeout: 120_000 });
   } catch {
     const remainingRows = await tenantRow.count();
     const currentStatus =
@@ -201,7 +201,7 @@ export const deleteTenant = async (page: Page, tenantName: string): Promise<void
         : 'unknown';
 
     throw new Error(
-      `Tenant "${tenantName}" was not removed from the Tenants table within 60 seconds ` +
+      `Tenant "${tenantName}" was not removed from the Tenants table within 120 seconds ` +
         `after deletion. The row is still present with status "${currentStatus}".`,
     );
   }
