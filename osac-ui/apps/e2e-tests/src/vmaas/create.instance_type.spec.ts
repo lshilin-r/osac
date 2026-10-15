@@ -1,5 +1,6 @@
 import { test } from '@playwright/test';
 
+import { instanceTypeTestData } from './test_data';
 import { openAndLoginWithEnvironment } from '../../../../libs/test-utils/src/general/open_and_login';
 import {
   createInstanceType,
@@ -10,7 +11,6 @@ import { openInstanceTypesPage } from '../../../../libs/test-utils/src/main.page
 test('creates an instance type from Infrastructure', async ({ page }) => {
   // Allow login and page navigation to complete on a remote cluster.
   test.setTimeout(120_000);
-  const instanceTypeName = process.env.OSAC_INSTANCE_TYPE_NAME ?? 'instance-type-e2e';
 
   // 1. Open the browser and log in.
   await openAndLoginWithEnvironment(page, '/');
@@ -21,10 +21,13 @@ test('creates an instance type from Infrastructure', async ({ page }) => {
   // 3. Open the create page and verify its title.
   await openCreateInstanceTypePage(page);
 
-  // 4. Fill and submit a GPU-enabled instance type.
-  await createInstanceType(page, instanceTypeName, 'Instance type created by e2e test', 4, 16, {
-    count: 1,
-    resourceName: 'nvidia.com/A100',
-    pciDeviceSelector: '10DE:20B0',
-  });
+  // 4. Fill and submit the instance type defined in extravars.yaml.
+  await createInstanceType(
+    page,
+    instanceTypeTestData.name,
+    instanceTypeTestData.description,
+    instanceTypeTestData.vcpus,
+    instanceTypeTestData.memoryGib,
+    instanceTypeTestData.gpu,
+  );
 });

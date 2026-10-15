@@ -4,23 +4,24 @@
 # generate or transform it into the environment variables consumed by the
 # Playwright tests.
 
-OSAC_UI_BASE_URL: 'https://osac-ui-osac.apps.ostest.test.metalkube.org'
-OSAC_USERNAME: '<keycloak-user>'
+ui_base_url: 'https://osac-ui-osac.apps.ostest.test.metalkube.org'
+username: '<keycloak-user>'
 # Never store a real password here. Export OSAC_PASSWORD separately.
-OSAC_PASSWORD: '<provided-separately>'
-IGNORE_HTTPS_ERRORS: 'true'
+password: '<provided-separately>'
+ignore_https_errors: true
 
-OSAC_TENANT_NAME: 'tenant1'
+tenant_name: 'tenant1'
 
-OSAC_INSTANCE_TYPE_NAME: 'instance-type-e2e'
-OSAC_INSTANCE_TYPE_DESCRIPTION: 'Instance type created by e2e test'
-OSAC_INSTANCE_TYPE_VCPUS: 4
-OSAC_INSTANCE_TYPE_MEMORY_GIB: 16
-OSAC_INSTANCE_TYPE_GPU:
-  count: 1
-  resource_name: 'nvidia.com/A100'
-  pci_device_selector: '10DE:20B0'
-OSAC_INSTANCE_TYPE_LIFECYCLE_ACTIONS:
-  - 'Deprecate'
-  - 'Obsolete'
-OSAC_INSTANCE_TYPE_DELETE_STATE: 'Obsolete'
+instance_type:
+  name: 'instance-type-e2e'
+  description: 'Instance type created by e2e test'
+  vcpus: 4
+  memory_gib: 16
+  gpu:
+    count: 1
+    resource_name: 'nvidia.com/A100'
+    pci_device_selector: '10DE:20B0'
+  lifecycle_actions:
+    - 'Deprecate'
+    - 'Obsolete'
+  delete_state: 'Obsolete'
