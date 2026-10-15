@@ -1,13 +1,8 @@
-# Seed values for the VMaaS UI tests.
+# Non-sensitive seed values for the VMaaS UI tests.
 #
-# This file is intentionally static for now. A future test-runner script will
-# generate or transform it into the environment variables consumed by the
-# Playwright tests.
+# The deployment URL and Keycloak credentials must be supplied through
+# OSAC_UI_BASE_URL, OSAC_USERNAME, and OSAC_PASSWORD.
 
-ui_base_url: 'https://osac-ui-osac.apps.ostest.test.metalkube.org'
-username: '<keycloak-user>'
-# Never store a real password here. Export OSAC_PASSWORD separately.
-password: '<provided-separately>'
 ignore_https_errors: true
 
 tenant_name: 'tenant1'
