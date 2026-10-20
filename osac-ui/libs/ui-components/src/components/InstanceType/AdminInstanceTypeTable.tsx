@@ -7,7 +7,6 @@ import ResourceNameField from '@osac/ui-components/components/Resource/ResourceN
 
 import AdminInstanceTypeActionsMenu from './AdminInstanceTypeActionsMenu';
 import InstanceTypeLifecycleLabel from './InstanceTypeLifecycleLabel';
-import { instanceTypeTestIds } from './testIds';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Timestamp } from '../Primitives/Timestamp';
 
@@ -28,11 +27,7 @@ const AdminInstanceTypeTable = ({ instanceTypes }: AdminInstanceTypeTableProps) 
   const { t } = useTranslation();
 
   return (
-    <Table
-      aria-label={t('Instance types')}
-      variant="compact"
-      data-testid={instanceTypeTestIds.table}
-    >
+    <Table aria-label={t('Instance types')} variant="compact">
       <Thead>
         <Tr>
           <Th width={NAME_COLUMN_WIDTH}>{t('Name')}</Th>
@@ -48,65 +43,42 @@ const AdminInstanceTypeTable = ({ instanceTypes }: AdminInstanceTypeTableProps) 
         {instanceTypes.length === 0 ? (
           <Tr>
             <Td colSpan={EMPTY_STATE_COLUMN_SPAN}>
-              <div data-testid={instanceTypeTestIds.emptyState}>
-                <Bullseye>
-                  <EmptyState
-                    headingLevel="h2"
-                    titleText={t('No instance types yet.')}
-                    icon={SearchIcon}
-                    variant={EmptyStateVariant.sm}
-                  >
-                    <EmptyStateBody>
-                      {t('Create an instance type to start defining provider-managed sizes.')}
-                    </EmptyStateBody>
-                  </EmptyState>
-                </Bullseye>
-              </div>
+              <Bullseye>
+                <EmptyState
+                  headingLevel="h2"
+                  titleText={t('No instance types yet.')}
+                  icon={SearchIcon}
+                  variant={EmptyStateVariant.sm}
+                >
+                  <EmptyStateBody>
+                    {t('Create an instance type to start defining provider-managed sizes.')}
+                  </EmptyStateBody>
+                </EmptyState>
+              </Bullseye>
             </Td>
           </Tr>
         ) : (
           instanceTypes.map((instanceType) => {
             const gpu = instanceType.spec?.gpu;
             return (
-              <Tr key={instanceType.id} data-testid={instanceTypeTestIds.row}>
-                <Td
-                  dataLabel={t('Name')}
-                  modifier="truncate"
-                  width={NAME_COLUMN_WIDTH}
-                  data-testid={instanceTypeTestIds.nameCell}
-                >
+              <Tr key={instanceType.id}>
+                <Td dataLabel={t('Name')} modifier="truncate" width={NAME_COLUMN_WIDTH}>
                   <ResourceNameField
                     resource={instanceType}
                     detailsUrl={`/admin/infrastructure/instance-types/${instanceType.id}`}
                     maxCharsDisplayed={INSTANCE_TYPE_NAME_PREVIEW_LENGTH}
                   />
                 </Td>
-                <Td
-                  dataLabel={t('Lifecycle state')}
-                  width={LIFECYCLE_STATE_COLUMN_WIDTH}
-                  data-testid={instanceTypeTestIds.lifecycleCell}
-                >
+                <Td dataLabel={t('Lifecycle state')} width={LIFECYCLE_STATE_COLUMN_WIDTH}>
                   <InstanceTypeLifecycleLabel state={instanceType.spec?.state} />
                 </Td>
-                <Td
-                  dataLabel={t('vCPUs')}
-                  width={CPU_CORES_COLUMN_WIDTH}
-                  data-testid={instanceTypeTestIds.vcpusCell}
-                >
+                <Td dataLabel={t('vCPUs')} width={CPU_CORES_COLUMN_WIDTH}>
                   {instanceType.spec?.vcpus ?? '—'}
                 </Td>
-                <Td
-                  dataLabel={t('Memory (GiB)')}
-                  width={MEMORY_COLUMN_WIDTH}
-                  data-testid={instanceTypeTestIds.memoryGibCell}
-                >
+                <Td dataLabel={t('Memory (GiB)')} width={MEMORY_COLUMN_WIDTH}>
                   {instanceType.spec?.memoryGib ?? '—'}
                 </Td>
-                <Td
-                  dataLabel={t('GPUs')}
-                  width={GPU_COLUMN_WIDTH}
-                  data-testid={instanceTypeTestIds.gpusCell}
-                >
+                <Td dataLabel={t('GPUs')} width={GPU_COLUMN_WIDTH}>
                   {gpu?.count ?? '—'}
                 </Td>
                 <Td dataLabel={t('Created')} width={CREATED_COLUMN_WIDTH}>

@@ -1,7 +1,4 @@
-import {
-  instanceTypeFieldIds,
-  instanceTypeTestIds,
-} from '../ui-components/src/components/InstanceType/testIds';
+import { instanceTypeFieldIds } from '../ui-components/src/components/InstanceType/fieldIds';
 
 type InstanceTypesLocator =
   | readonly [
@@ -10,20 +7,19 @@ type InstanceTypesLocator =
     ]
   | readonly [label: string];
 
-const testId = (value: string): readonly [string] => [`[data-testid="${value}"]`];
 const id = (value: string): readonly [string] => [`#${value}`];
 
 export const InstanceTypesMainPage = {
-  pageTitle: testId(instanceTypeTestIds.listPageTitle),
-  createInstanceType: testId(instanceTypeTestIds.listCreateButton),
-  instanceTypesTable: testId(instanceTypeTestIds.table),
-  instanceTypeRows: testId(instanceTypeTestIds.row),
-  instanceTypeNameCell: testId(instanceTypeTestIds.nameCell),
-  instanceTypeLifecycleCell: testId(instanceTypeTestIds.lifecycleCell),
-  instanceTypeVcpusCell: testId(instanceTypeTestIds.vcpusCell),
-  instanceTypeMemoryGibCell: testId(instanceTypeTestIds.memoryGibCell),
-  instanceTypeGpusCell: testId(instanceTypeTestIds.gpusCell),
-  instanceTypeActionsToggle: testId(instanceTypeTestIds.actionsToggle),
+  pageTitle: ['heading', { name: 'Instance types', exact: true }],
+  createInstanceType: ['link', { name: 'Create instance type', exact: true }],
+  instanceTypesTable: ['grid', { name: 'Instance types', exact: true }],
+  instanceTypeRows: ['tbody tr'],
+  instanceTypeNameCell: ['td[data-label="Name"]'],
+  instanceTypeLifecycleCell: ['td[data-label="Lifecycle state"]'],
+  instanceTypeVcpusCell: ['td[data-label="vCPUs"]'],
+  instanceTypeMemoryGibCell: ['td[data-label="Memory (GiB)"]'],
+  instanceTypeGpusCell: ['td[data-label="GPUs"]'],
+  instanceTypeActionsToggle: ['button[aria-label^="Actions for "]'],
   emptyStateTitle: ['heading', { name: 'No instance types yet.', exact: true }],
 } as const satisfies Record<string, InstanceTypesLocator>;
 
@@ -35,7 +31,7 @@ export const InstanceTypesActionsMenu = {
 } as const satisfies Record<string, InstanceTypesLocator>;
 
 export const InstanceTypesCreatePage = {
-  pageTitle: testId(instanceTypeTestIds.createPageTitle),
+  pageTitle: ['heading', { name: 'Create instance type', exact: true }],
   instanceTypesBreadcrumb: ['button', { name: 'Instance types', exact: true }],
   name: id(instanceTypeFieldIds.name),
   description: id(instanceTypeFieldIds.description),
@@ -53,16 +49,15 @@ export const InstanceTypesCreatePage = {
   ],
   gpuResourceName: id(instanceTypeFieldIds.gpuResourceName),
   gpuPciDeviceSelector: id(instanceTypeFieldIds.gpuPciDeviceSelector),
-  create: testId(instanceTypeTestIds.createButton),
-  cancel: testId(instanceTypeTestIds.cancelButton),
+  create: ['button', { name: 'Create', exact: true }],
+  cancel: ['button', { name: 'Cancel', exact: true }],
 } as const satisfies Record<string, InstanceTypesLocator>;
 
 export const InstanceTypesDetailPage = {
   instanceTypesBreadcrumb: ['button', { name: 'Instance types', exact: true }],
-  pageTitle: testId(instanceTypeTestIds.detailPageTitle),
-  description: testId(instanceTypeTestIds.detailDescription),
-  detailsCard: testId(instanceTypeTestIds.detailsCard),
-  gpuCard: testId(instanceTypeTestIds.gpuCard),
+  pageTitle: ['h1.pf-v6-c-title'],
+  description: ['main .pf-v6-l-flex p[data-pf-content="true"]'],
+  cards: ['.pf-v6-c-card'],
   detailsGroups: ['.pf-v6-c-description-list__group'],
   detailValue: ['.pf-v6-c-description-list__description'],
   noGpuMessage: ['This instance type has no GPU attached.'],

@@ -3,9 +3,7 @@ import { Content, Flex, FlexItem, PageSection, Stack, Title } from '@patternfly/
 
 type ListPageProps = {
   title: string;
-  titleTestId?: string;
   description?: string;
-  descriptionTestId?: string;
   actions?: React.ReactNode;
   breadcrumb?: React.ReactNode;
   error?: unknown;
@@ -14,9 +12,7 @@ type ListPageProps = {
 
 const ListPage: React.FC<ListPageProps> = ({
   title,
-  titleTestId,
   description,
-  descriptionTestId,
   actions,
   breadcrumb,
   error,
@@ -33,14 +29,10 @@ const ListPage: React.FC<ListPageProps> = ({
           <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsSm' }}>
             {breadcrumb ? <FlexItem>{breadcrumb}</FlexItem> : null}
             <FlexItem>
-              <Title headingLevel="h1" size="3xl" data-testid={titleTestId}>
+              <Title headingLevel="h1" size="3xl">
                 {title}
               </Title>
-              {description && (
-                <Content component="p" data-testid={descriptionTestId}>
-                  {description}
-                </Content>
-              )}
+              {description && <Content component="p">{description}</Content>}
             </FlexItem>
           </Flex>
         </FlexItem>

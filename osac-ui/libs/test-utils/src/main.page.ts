@@ -58,5 +58,5 @@ export const openTenantsPage = async (page: Page): Promise<void> => {
 export const openInstanceTypesPage = async (page: Page): Promise<void> => {
   await openMainPageOption(page, 'instanceTypes');
 
-  await expect(page.locator(...InstanceTypesMainPage.pageTitle)).toBeVisible();
+  await expect(page.getByRole(...InstanceTypesMainPage.pageTitle)).toBeVisible();
 };

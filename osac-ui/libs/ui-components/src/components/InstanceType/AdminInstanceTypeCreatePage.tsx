@@ -11,7 +11,6 @@ import {
 import InstanceTypeCreateForm, {
   INSTANCE_TYPES_LIST_ROUTE,
 } from './CreatePage/InstanceTypeCreateForm';
-import { instanceTypeTestIds } from './testIds';
 import { useTranslation } from '../../hooks/useTranslation';
 
 const AdminInstanceTypeCreatePage = () => {
@@ -24,18 +23,13 @@ const AdminInstanceTypeCreatePage = () => {
         <Stack hasGutter>
           <Breadcrumb>
             <BreadcrumbItem>
-              <Button
-                variant="link"
-                isInline
-                onClick={() => navigate(INSTANCE_TYPES_LIST_ROUTE)}
-                data-testid={instanceTypeTestIds.createBreadcrumb}
-              >
+              <Button variant="link" isInline onClick={() => navigate(INSTANCE_TYPES_LIST_ROUTE)}>
                 {t('Instance types')}
               </Button>
             </BreadcrumbItem>
             <BreadcrumbItem isActive>{t('Create')}</BreadcrumbItem>
           </Breadcrumb>
-          <Title headingLevel="h1" size="3xl" data-testid={instanceTypeTestIds.createPageTitle}>
+          <Title headingLevel="h1" size="3xl">
             {t('Create instance type')}
           </Title>
         </Stack>

@@ -15,7 +15,7 @@ import { InstanceTypes } from '@osac/types/private';
 import { useCreateResource } from '@osac/ui-components/api/use-resource';
 
 import { getInstanceTypeCreateSchema } from './validation';
-import { instanceTypeFieldIds, instanceTypeTestIds } from '../testIds';
+import { instanceTypeFieldIds } from '../fieldIds';
 import { InstanceTypeCreateFormValues, instanceTypeCreateValues } from './values';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { getErrorMessage } from '../../../utils/error';
@@ -135,7 +135,6 @@ const InstanceTypeCreateForm = () => {
                       onClick={submitForm}
                       isDisabled={isSubmitting}
                       isLoading={isSubmitting}
-                      data-testid={instanceTypeTestIds.createButton}
                     >
                       {t('Create')}
                     </Button>
@@ -145,7 +144,6 @@ const InstanceTypeCreateForm = () => {
                       variant="link"
                       onClick={() => navigate(INSTANCE_TYPES_LIST_ROUTE)}
                       isDisabled={isSubmitting}
-                      data-testid={instanceTypeTestIds.cancelButton}
                     >
                       {t('Cancel')}
                     </Button>
