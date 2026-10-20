@@ -3,39 +3,29 @@ import type { TFunction } from 'i18next';
 import { InstanceTypeState, InstanceTypes } from '@osac/types/private';
 import { useUpdateResource } from '@osac/ui-components/api/use-resource';
 
+import {
+  type InstanceTypeLifecycleState,
+  getInstanceTypeLifecycleActionAvailability,
+} from './instanceTypeLifecycle';
 import { useTranslation } from '../../hooks/useTranslation';
 import { getErrorMessage } from '../../utils/error';
-import { getResourceLifecycleActions } from '../Resource/getResourceLifecycleActions';
 import { useToast } from '../Toast/useToast';
 
 export type InstanceTypeLifecycleAction = Exclude<InstanceTypeState, InstanceTypeState.UNSPECIFIED>;
 
-const INSTANCE_TYPE_LIFECYCLE_ACTION_RULES = {
-  canDeprecate: [
-    InstanceTypeState.UNSPECIFIED,
-    InstanceTypeState.ACTIVE,
-    InstanceTypeState.OBSOLETE,
-  ],
-  canObsolete: [
-    InstanceTypeState.UNSPECIFIED,
-    InstanceTypeState.ACTIVE,
-    InstanceTypeState.DEPRECATED,
-  ],
-  canReactivate: [
-    InstanceTypeState.UNSPECIFIED,
-    InstanceTypeState.DEPRECATED,
-    InstanceTypeState.OBSOLETE,
-  ],
-  canDelete: [InstanceTypeState.OBSOLETE],
-};
-
 /** Determines which lifecycle transitions are valid from the instance type's current state. */
-export const getInstanceTypeLifecycleActions = (state: InstanceTypeState | undefined) =>
-  getResourceLifecycleActions(
-    state,
-    InstanceTypeState.UNSPECIFIED,
-    INSTANCE_TYPE_LIFECYCLE_ACTION_RULES,
-  );
+export const getInstanceTypeLifecycleActions = (state: InstanceTypeState | undefined) => {
+  const stateLabel: InstanceTypeLifecycleState =
+    state === InstanceTypeState.ACTIVE
+      ? 'Active'
+      : state === InstanceTypeState.DEPRECATED
+        ? 'Deprecated'
+        : state === InstanceTypeState.OBSOLETE
+          ? 'Obsolete'
+          : 'Unspecified';
+
+  return getInstanceTypeLifecycleActionAvailability(stateLabel);
+};
 
 const getLifecycleErrorTitle = (t: TFunction, action: InstanceTypeLifecycleAction): string => {
   switch (action) {

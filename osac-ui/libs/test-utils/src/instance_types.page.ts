@@ -12,6 +12,11 @@ import {
   InstanceTypesDetailPage,
   InstanceTypesMainPage,
 } from '../../locators/instance_types';
+import {
+  type InstanceTypeLifecycleState as SharedInstanceTypeLifecycleState,
+  getInstanceTypeLifecycleActionAvailability,
+  getNextInstanceTypeLifecycleState,
+} from '../../ui-components/src/components/InstanceType/instanceTypeLifecycle';
 
 export interface InstanceTypeGpu {
   count: number;
@@ -35,16 +40,19 @@ const lifecycleActionLocators: Record<InstanceTypeMenuAction, MenuItemLocator> =
   Delete: InstanceTypesActionsMenu.delete,
 };
 
-const expectedMenuActions: Record<InstanceTypeLifecycleState, readonly InstanceTypeMenuAction[]> = {
-  Active: ['Deprecate', 'Obsolete'],
-  Deprecated: ['Obsolete', 'Reactivate'],
-  Obsolete: ['Deprecate', 'Reactivate', 'Delete'],
+const sharedStateByLabel: Record<InstanceTypeLifecycleState, SharedInstanceTypeLifecycleState> = {
+  Active: 'Active',
+  Deprecated: 'Deprecated',
+  Obsolete: 'Obsolete',
 };
 
-const nextLifecycleState: Record<InstanceTypeLifecycleAction, InstanceTypeLifecycleState> = {
-  Deprecate: 'Deprecated',
-  Obsolete: 'Obsolete',
-  Reactivate: 'Active',
+const availabilityByAction: Record<
+  InstanceTypeLifecycleAction,
+  keyof ReturnType<typeof getInstanceTypeLifecycleActionAvailability>
+> = {
+  Deprecate: 'canDeprecate',
+  Obsolete: 'canObsolete',
+  Reactivate: 'canReactivate',
 };
 
 const allMenuActions: readonly InstanceTypeMenuAction[] = [
@@ -53,6 +61,19 @@ const allMenuActions: readonly InstanceTypeMenuAction[] = [
   'Reactivate',
   'Delete',
 ];
+
+const expectedMenuActions = (lifecycleState: InstanceTypeLifecycleState) => {
+  const availability = getInstanceTypeLifecycleActionAvailability(
+    sharedStateByLabel[lifecycleState],
+  );
+
+  return allMenuActions.filter((action) =>
+    action === 'Delete' ? availability.canDelete : availability[availabilityByAction[action]],
+  );
+};
+
+const nextLifecycleState = (action: InstanceTypeLifecycleAction): InstanceTypeLifecycleState =>
+  getNextInstanceTypeLifecycleState(action);
 
 const setNumberWithPlusButton = async (
   plusButton: Locator,
@@ -105,7 +126,7 @@ const expectActionMenu = async (
   page: Page,
   lifecycleState: InstanceTypeLifecycleState,
 ): Promise<void> => {
-  const availableActions = expectedMenuActions[lifecycleState];
+  const availableActions = expectedMenuActions(lifecycleState);
   for (const action of availableActions) {
     const menuItem = getMenuItem(page, action);
     await expect(menuItem).toBeVisible();
@@ -284,7 +305,7 @@ export const changeInstanceTypeLifecycle = async (
 
   // Select the requested lifecycle action and wait for the row to reach its new state.
   await getMenuItem(page, action).click();
-  const expectedState = nextLifecycleState[action];
+  const expectedState = nextLifecycleState(action);
   await expect(
     instanceTypeRow.locator(...InstanceTypesMainPage.instanceTypeLifecycleCell),
   ).toHaveText(exactText(expectedState));
