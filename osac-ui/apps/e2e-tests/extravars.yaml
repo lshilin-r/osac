@@ -3,8 +3,6 @@
 # The deployment URL and Keycloak credentials must be supplied through
 # OSAC_UI_BASE_URL, OSAC_USERNAME, and OSAC_PASSWORD.
 
-ignore_https_errors: true
-
 tenant_name: 'tenant1'
 
 instance_type:
