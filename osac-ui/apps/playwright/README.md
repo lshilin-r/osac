@@ -148,15 +148,16 @@ complete instance type flow from the repository root:
 
 ```bash
 pnpm --filter @osac/playwright exec playwright test \
-  --project=vmaas-instance-type-delete
+  --project=vmaas-instance-type-lifecycle
 ```
 
-Playwright runs the two project dependencies automatically. Add `--headed` to
-the command when a graphical display is available:
+Playwright runs the create dependency, then runs the create project's teardown
+to delete the instance type after the lifecycle test. Add `--headed` to the
+command when a graphical display is available:
 
 ```bash
 pnpm --filter @osac/playwright exec playwright test \
-  --project=vmaas-instance-type-delete --headed
+  --project=vmaas-instance-type-lifecycle --headed
 ```
 
 To run the three instance type tests separately, run them in this order:
@@ -181,7 +182,7 @@ projects; each terminal project runs its own dependency chain:
 
 ```bash
 pnpm --filter @osac/playwright exec playwright test \
-  --project=vmaas-delete --project=vmaas-instance-type-delete
+  --project=vmaas-delete --project=vmaas-instance-type-lifecycle
 ```
 
 ## How authentication works

@@ -103,12 +103,14 @@ const expectActionMenu = async (
   lifecycleState: InstanceTypeLifecycleState,
 ): Promise<void> => {
   const availableActions = expectedMenuActions[lifecycleState];
-  for (const action of allMenuActions) {
+  for (const action of availableActions) {
     const menuItem = getMenuItem(page, action);
-    if (availableActions.includes(action)) {
-      await expect(menuItem).toBeVisible();
-    } else {
-      await expect(menuItem).toHaveCount(0);
+    await expect(menuItem).toBeVisible();
+  }
+
+  for (const action of allMenuActions) {
+    if (!availableActions.includes(action)) {
+      await expect(getMenuItem(page, action)).toHaveCount(0);
     }
   }
 };
