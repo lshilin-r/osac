@@ -136,6 +136,22 @@ export const openCreateInstanceTypePage = async (page: Page): Promise<void> => {
   await expect(page.getByRole(...InstanceTypesCreatePage.pageTitle)).toBeVisible();
 };
 
+/** Verify that the requested instance type is not already present in the list. */
+export const expectInstanceTypeNotToExist = async (page: Page, name: string): Promise<void> => {
+  const instanceTypeRow = getInstanceTypeRow(page, name);
+  try {
+    await expect(instanceTypeRow).toHaveCount(1, { timeout: 3_000 });
+  } catch {
+    if ((await instanceTypeRow.count()) === 0) {
+      return;
+    }
+  }
+
+  throw new Error(
+    `Cannot create instance type "${name}": an instance type with this name already exists.`,
+  );
+};
+
 /** Fill and submit the instance type creation form. */
 export const createInstanceType = async (
   page: Page,
