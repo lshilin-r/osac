@@ -160,11 +160,11 @@ pnpm --filter @osac/playwright exec playwright test \
   --project=vmaas-instance-type-lifecycle --headed
 ```
 
-To run the three instance type tests separately, run them in this order:
+To run the three instance-type tests separately, run them in this order:
 
 ```bash
 pnpm --filter @osac/playwright exec playwright test \
-  create.instance_type.spec.ts --project=vmaas-instance-type
+  create.instance_type.spec.ts --project=vmaas-instance-type --no-deps
 
 pnpm --filter @osac/playwright exec playwright test \
   lifecycle.instance_type.spec.ts --project=vmaas-instance-type-lifecycle --no-deps
