@@ -14,10 +14,10 @@ export interface InstanceTypeGpu {
   pciDeviceSelector: string;
 }
 
-export type InstanceTypeLifecycleAction = 'Deprecate' | 'Obsolete';
+export type InstanceTypeLifecycleAction = 'Deprecate' | 'Obsolete' | 'Reactivate';
 
 type InstanceTypeLifecycleState = 'Active' | 'Deprecated' | 'Obsolete';
-type InstanceTypeMenuAction = InstanceTypeLifecycleAction | 'Reactivate' | 'Delete';
+type InstanceTypeMenuAction = InstanceTypeLifecycleAction | 'Delete';
 type MenuItemLocator = readonly [
   role: 'menuitem',
   options: { readonly name: string; readonly exact: true },
@@ -39,6 +39,7 @@ const expectedMenuActions: Record<InstanceTypeLifecycleState, readonly InstanceT
 const nextLifecycleState: Record<InstanceTypeLifecycleAction, InstanceTypeLifecycleState> = {
   Deprecate: 'Deprecated',
   Obsolete: 'Obsolete',
+  Reactivate: 'Active',
 };
 
 const allMenuActions: readonly InstanceTypeMenuAction[] = [
@@ -145,7 +146,7 @@ export const createInstanceType = async (
   gpu?: InstanceTypeGpu,
 ): Promise<void> => {
   // Enter the instance type name and description.
-  await page.getByLabel(...InstanceTypesCreatePage.name).fill(name);
+  await page.getByRole(...InstanceTypesCreatePage.name).fill(name);
   await page.getByLabel(...InstanceTypesCreatePage.description).fill(description);
 
   // Set vCPUs and memory by clicking each field's Plus button.
@@ -286,14 +287,23 @@ export const changeInstanceTypeLifecycle = async (
   await instanceTypeRow.locator(...InstanceTypesMainPage.instanceTypeActionsToggle).click();
 };
 
-/** Delete an Obsolete instance type and wait for its row to disappear. */
+/** Make an instance type Obsolete when needed, delete it, and wait for its row to disappear. */
 export const deleteInstanceType = async (page: Page, name: string): Promise<void> => {
-  // Locate the requested instance type and require it to be Obsolete before deletion.
+  // Locate the requested instance type and read its current lifecycle state.
   const instanceTypeRow = getInstanceTypeRow(page, name);
   await expect(instanceTypeRow).toHaveCount(1);
-  await expect(
-    instanceTypeRow.locator(...InstanceTypesMainPage.instanceTypeLifecycleCell),
-  ).toHaveText(exactText('Obsolete'));
+
+  const currentState = await getLifecycleState(instanceTypeRow);
+
+  if (currentState !== 'Obsolete') {
+    // Open the row's action menu, select Obsolete, and verify the state changes.
+    await instanceTypeRow.locator(...InstanceTypesMainPage.instanceTypeActionsToggle).click();
+    await expectActionMenu(page, currentState);
+    await getMenuItem(page, 'Obsolete').click();
+    await expect(
+      instanceTypeRow.locator(...InstanceTypesMainPage.instanceTypeLifecycleCell),
+    ).toHaveText(exactText('Obsolete'));
+  }
 
   // Open the three-dot action menu, verify the Obsolete options, and select Delete.
   await instanceTypeRow.locator(...InstanceTypesMainPage.instanceTypeActionsToggle).click();

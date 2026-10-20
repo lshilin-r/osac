@@ -5,7 +5,7 @@ import { openAndLoginWithEnvironment } from '../../../../libs/test-utils/src/gen
 import { deleteInstanceType } from '../../../../libs/test-utils/src/instance_types.page';
 import { openInstanceTypesPage } from '../../../../libs/test-utils/src/main.page';
 
-test('deletes the requested obsolete instance type', async ({ page }) => {
+test('deletes the requested instance type', async ({ page }) => {
   test.setTimeout(120_000);
 
   // 1. Open the browser and log in.

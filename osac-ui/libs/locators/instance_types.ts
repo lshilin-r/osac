@@ -1,6 +1,6 @@
 type InstanceTypesLocator =
   | readonly [
-      role: 'link' | 'button' | 'heading' | 'grid' | 'menuitem',
+      role: 'link' | 'button' | 'heading' | 'textbox' | 'grid' | 'menuitem',
       options: { name: string; exact: true },
     ]
   | readonly [label: string];
@@ -29,7 +29,7 @@ export const InstanceTypesActionsMenu = {
 export const InstanceTypesCreatePage = {
   pageTitle: ['heading', { name: 'Create instance type', exact: true }],
   instanceTypesBreadcrumb: ['button', { name: 'Instance types', exact: true }],
-  name: ['Name'],
+  name: ['textbox', { name: 'Name', exact: true }],
   description: ['Description'],
   vcpus: ['vCPUs'],
   vcpusPlus: ['.pf-v6-c-number-input:has(#instance-type-vcpus) button[aria-label="Plus"]'],
