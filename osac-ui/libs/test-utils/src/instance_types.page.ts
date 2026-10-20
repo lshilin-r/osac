@@ -1,6 +1,10 @@
 import { type Locator, type Page, expect } from '@playwright/test';
 
-import { confirmRowDeletion, expectRowNotToExist } from './general/row_assertions';
+import {
+  confirmRowDeletion,
+  expectRowNotToExist,
+  getTableRowByCellText,
+} from './general/row_assertions';
 import {
   InstanceTypesActionsMenu,
   InstanceTypesCreatePage,
@@ -84,13 +88,12 @@ const expectDetailValue = async (
 };
 
 const getInstanceTypeRow = (page: Page, name: string): Locator => {
-  const instanceTypeRows = page
-    .getByRole(...InstanceTypesMainPage.instanceTypesTable)
-    .locator(...InstanceTypesMainPage.instanceTypeRows);
-  const instanceTypeNameCell = instanceTypeRows
-    .locator(...InstanceTypesMainPage.instanceTypeNameCell)
-    .filter({ hasText: exactText(name) });
-  return instanceTypeNameCell.locator('..');
+  return getTableRowByCellText(
+    page.getByRole(...InstanceTypesMainPage.instanceTypesTable),
+    InstanceTypesMainPage.instanceTypeRows,
+    InstanceTypesMainPage.instanceTypeNameCell,
+    exactText(name),
+  );
 };
 
 const getMenuItem = (page: Page, action: InstanceTypeMenuAction): Locator => {

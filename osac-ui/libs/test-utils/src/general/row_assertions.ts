@@ -1,5 +1,18 @@
 import { type Locator, expect } from '@playwright/test';
 
+/** Locate a table row by the exact text of one of its cells. */
+export const getTableRowByCellText = (
+  table: Locator,
+  rowLocator: readonly [selector: string],
+  cellLocator: readonly [selector: string],
+  cellText: RegExp,
+): Locator =>
+  table
+    .locator(...rowLocator)
+    .locator(...cellLocator)
+    .filter({ hasText: cellText })
+    .locator('..');
+
 /** Verify that a resource row is absent and report a clear duplicate error otherwise. */
 export const expectRowNotToExist = async (
   row: Locator,

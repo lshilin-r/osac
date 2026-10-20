@@ -3,7 +3,11 @@ import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { confirmRowDeletion, expectRowNotToExist } from './general/row_assertions';
+import {
+  confirmRowDeletion,
+  expectRowNotToExist,
+  getTableRowByCellText,
+} from './general/row_assertions';
 import {
   TenantsCreatePage,
   TenantsCredentialsPage,
@@ -19,13 +23,12 @@ const exactText = (value: string): RegExp =>
   new RegExp(`^\\s*${escapeRegExp(value.normalize('NFC'))}\\s*$`);
 
 const getTenantRow = (page: Page, tenantName: string): Locator => {
-  const tenantRows = page
-    .getByRole(...TenantsMainPage.tenantsTable)
-    .locator(...TenantsMainPage.tenantRows);
-  const tenantNameCell = tenantRows
-    .locator(...TenantsMainPage.tenantNameCell)
-    .filter({ hasText: exactText(tenantName) });
-  return tenantNameCell.locator('..');
+  return getTableRowByCellText(
+    page.getByRole(...TenantsMainPage.tenantsTable),
+    TenantsMainPage.tenantRows,
+    TenantsMainPage.tenantNameCell,
+    exactText(tenantName),
+  );
 };
 
 const getTenantNames = async (page: Page): Promise<string[]> =>
