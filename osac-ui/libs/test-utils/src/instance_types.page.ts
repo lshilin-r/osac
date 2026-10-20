@@ -13,9 +13,8 @@ import {
   InstanceTypesMainPage,
 } from '../../locators/instance_types';
 import {
-  type InstanceTypeLifecycleState as SharedInstanceTypeLifecycleState,
-  getInstanceTypeLifecycleActionAvailability,
-  getNextInstanceTypeLifecycleState,
+  instanceTypeLifecycleActionsByState,
+  instanceTypeLifecycleNextState,
 } from '../../ui-components/src/components/InstanceType/instanceTypeLifecycle';
 
 export interface InstanceTypeGpu {
@@ -40,21 +39,6 @@ const lifecycleActionLocators: Record<InstanceTypeMenuAction, MenuItemLocator> =
   Delete: InstanceTypesActionsMenu.delete,
 };
 
-const sharedStateByLabel: Record<InstanceTypeLifecycleState, SharedInstanceTypeLifecycleState> = {
-  Active: 'Active',
-  Deprecated: 'Deprecated',
-  Obsolete: 'Obsolete',
-};
-
-const availabilityByAction: Record<
-  InstanceTypeLifecycleAction,
-  keyof ReturnType<typeof getInstanceTypeLifecycleActionAvailability>
-> = {
-  Deprecate: 'canDeprecate',
-  Obsolete: 'canObsolete',
-  Reactivate: 'canReactivate',
-};
-
 const allMenuActions: readonly InstanceTypeMenuAction[] = [
   'Deprecate',
   'Obsolete',
@@ -63,17 +47,8 @@ const allMenuActions: readonly InstanceTypeMenuAction[] = [
 ];
 
 const expectedMenuActions = (lifecycleState: InstanceTypeLifecycleState) => {
-  const availability = getInstanceTypeLifecycleActionAvailability(
-    sharedStateByLabel[lifecycleState],
-  );
-
-  return allMenuActions.filter((action) =>
-    action === 'Delete' ? availability.canDelete : availability[availabilityByAction[action]],
-  );
+  return instanceTypeLifecycleActionsByState[lifecycleState];
 };
-
-const nextLifecycleState = (action: InstanceTypeLifecycleAction): InstanceTypeLifecycleState =>
-  getNextInstanceTypeLifecycleState(action);
 
 const setNumberWithPlusButton = async (
   plusButton: Locator,
@@ -305,7 +280,7 @@ export const changeInstanceTypeLifecycle = async (
 
   // Select the requested lifecycle action and wait for the row to reach its new state.
   await getMenuItem(page, action).click();
-  const expectedState = nextLifecycleState(action);
+  const expectedState = instanceTypeLifecycleNextState[action];
   await expect(
     instanceTypeRow.locator(...InstanceTypesMainPage.instanceTypeLifecycleCell),
   ).toHaveText(exactText(expectedState));
