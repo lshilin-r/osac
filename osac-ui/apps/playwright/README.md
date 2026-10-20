@@ -175,7 +175,10 @@ pnpm --filter @osac/playwright exec playwright test \
 
 The `--no-deps` option is appropriate only for the separate commands because
 the preceding command has already established the required instance type.
-Running the delete test removes the instance type from the deployment.
+Running the delete test removes the instance type from the deployment. If the
+requested instance type is absent, the standalone delete test creates it from
+`extravars.yaml` first; unrelated instance types already listed in the table
+are not modified.
 
 To run the tenant and instance type flows together, include both terminal
 projects; each terminal project runs its own dependency chain:

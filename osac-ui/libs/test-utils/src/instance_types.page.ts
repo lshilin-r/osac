@@ -191,6 +191,36 @@ export const createInstanceType = async (
   await expectInstanceTypeListed(page, name, vcpus, memoryGib, gpu);
 };
 
+/** Ensure the requested instance type exists before a standalone delete run. */
+export const ensureInstanceTypeExists = async (
+  page: Page,
+  name: string,
+  description: string,
+  vcpus: number,
+  memoryGib: number,
+  gpu?: InstanceTypeGpu,
+): Promise<void> => {
+  const instanceTypeRow = getInstanceTypeRow(page, name);
+
+  try {
+    await expect(instanceTypeRow).toHaveCount(1, { timeout: 3_000 });
+    return;
+  } catch {
+    const matchingRows = await instanceTypeRow.count();
+    if (matchingRows !== 0) {
+      throw new Error(
+        `Expected exactly one instance type named "${name}" before deletion, ` +
+          `but found ${matchingRows}.`,
+      );
+    }
+  }
+
+  // Keep deletion self-contained when the requested instance type is absent,
+  // while leaving any unrelated rows in the table unchanged.
+  await openCreateInstanceTypePage(page);
+  await createInstanceType(page, name, description, vcpus, memoryGib, gpu);
+};
+
 /** Verify the created instance type details and active lifecycle state. */
 export const expectInstanceTypeCreated = async (
   page: Page,
