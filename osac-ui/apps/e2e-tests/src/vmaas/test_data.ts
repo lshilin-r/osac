@@ -21,7 +21,6 @@ interface RawInstanceType {
   memory_gib: number;
   gpu?: RawInstanceTypeGpu;
   lifecycle_actions: InstanceTypeLifecycleAction[];
-  delete_state: 'Obsolete';
 }
 
 interface RawExtravars {
@@ -35,7 +34,6 @@ export interface InstanceTypeTestData {
   memoryGib: number;
   gpu?: InstanceTypeGpu;
   lifecycleActions: InstanceTypeLifecycleAction[];
-  deleteState: 'Obsolete';
 }
 
 const extravarsPath = path.resolve(
@@ -60,5 +58,4 @@ export const instanceTypeTestData: InstanceTypeTestData = {
       }
     : undefined,
   lifecycleActions: rawInstanceType.lifecycle_actions,
-  deleteState: rawInstanceType.delete_state,
 };

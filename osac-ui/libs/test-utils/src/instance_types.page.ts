@@ -296,13 +296,8 @@ export const deleteInstanceType = async (page: Page, name: string): Promise<void
   const currentState = await getLifecycleState(instanceTypeRow);
 
   if (currentState !== 'Obsolete') {
-    // Open the row's action menu, select Obsolete, and verify the state changes.
-    await instanceTypeRow.locator(...InstanceTypesMainPage.instanceTypeActionsToggle).click();
-    await expectActionMenu(page, currentState);
-    await getMenuItem(page, 'Obsolete').click();
-    await expect(
-      instanceTypeRow.locator(...InstanceTypesMainPage.instanceTypeLifecycleCell),
-    ).toHaveText(exactText('Obsolete'));
+    // Reuse the lifecycle transition flow before opening the delete menu.
+    await changeInstanceTypeLifecycle(page, name, 'Obsolete');
   }
 
   // Open the three-dot action menu, verify the Obsolete options, and select Delete.

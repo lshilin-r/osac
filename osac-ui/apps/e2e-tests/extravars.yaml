@@ -20,4 +20,3 @@ instance_type:
     - 'Deprecate'
     - 'Obsolete'
     - 'Reactivate'
-  delete_state: 'Obsolete'
