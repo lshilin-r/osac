@@ -1,5 +1,6 @@
 import { type Locator, type Page, expect } from '@playwright/test';
 
+import { confirmRowDeletion, expectRowNotToExist } from './general/row_assertions';
 import {
   InstanceTypesActionsMenu,
   InstanceTypesCreatePage,
@@ -138,16 +139,8 @@ export const openCreateInstanceTypePage = async (page: Page): Promise<void> => {
 
 /** Verify that the requested instance type is not already present in the list. */
 export const expectInstanceTypeNotToExist = async (page: Page, name: string): Promise<void> => {
-  const instanceTypeRow = getInstanceTypeRow(page, name);
-  try {
-    await expect(instanceTypeRow).toHaveCount(1, { timeout: 3_000 });
-  } catch {
-    if ((await instanceTypeRow.count()) === 0) {
-      return;
-    }
-  }
-
-  throw new Error(
+  await expectRowNotToExist(
+    getInstanceTypeRow(page, name),
     `Cannot create instance type "${name}": an instance type with this name already exists.`,
   );
 };
@@ -321,16 +314,16 @@ export const deleteInstanceType = async (page: Page, name: string): Promise<void
   await expectActionMenu(page, 'Obsolete');
   await getMenuItem(page, 'Delete').click();
 
-  // Verify the delete confirmation dialog and confirm the deletion.
+  // Verify the delete confirmation dialog and wait for the row to disappear.
   const deleteDialog = page.locator(...InstanceTypesDeletePage.deleteDialog);
-  await expect(deleteDialog).toBeVisible();
-  await expect(deleteDialog.locator(...InstanceTypesDeletePage.deleteTitle)).toContainText(
-    `Delete ${name}?`,
+  await confirmRowDeletion(
+    instanceTypeRow,
+    deleteDialog,
+    deleteDialog.locator(...InstanceTypesDeletePage.deleteTitle),
+    deleteDialog.getByText(...InstanceTypesDeletePage.deleteWarning),
+    deleteDialog.getByRole(...InstanceTypesDeletePage.deleteButton),
+    name,
+    'Instance type',
+    60_000,
   );
-  await expect(deleteDialog.getByText(...InstanceTypesDeletePage.deleteWarning)).toBeVisible();
-  await deleteDialog.getByRole(...InstanceTypesDeletePage.deleteButton).click();
-  await expect(deleteDialog).toBeHidden();
-
-  // Wait for the deleted instance type row to disappear from the table.
-  await expect(instanceTypeRow).toHaveCount(0, { timeout: 60_000 });
 };
