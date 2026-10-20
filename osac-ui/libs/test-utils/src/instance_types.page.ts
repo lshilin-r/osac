@@ -89,7 +89,7 @@ const expectDetailValue = async (
 
 const getInstanceTypeRow = (page: Page, name: string): Locator => {
   return getTableRowByCellText(
-    page.getByRole(...InstanceTypesMainPage.instanceTypesTable),
+    page.locator(...InstanceTypesMainPage.instanceTypesTable),
     InstanceTypesMainPage.instanceTypeRows,
     InstanceTypesMainPage.instanceTypeNameCell,
     exactText(name),
@@ -137,9 +137,9 @@ const getLifecycleState = async (instanceTypeRow: Locator): Promise<InstanceType
 
 /** Open the instance type creation page and verify its title. */
 export const openCreateInstanceTypePage = async (page: Page): Promise<void> => {
-  await page.getByRole(...InstanceTypesMainPage.createInstanceType).click();
+  await page.locator(...InstanceTypesMainPage.createInstanceType).click();
 
-  await expect(page.getByRole(...InstanceTypesCreatePage.pageTitle)).toBeVisible();
+  await expect(page.locator(...InstanceTypesCreatePage.pageTitle)).toBeVisible();
 };
 
 /** Verify that the requested instance type is not already present in the list. */
@@ -160,8 +160,8 @@ export const createInstanceType = async (
   gpu?: InstanceTypeGpu,
 ): Promise<void> => {
   // Enter the instance type name and description.
-  await page.getByRole(...InstanceTypesCreatePage.name).fill(name);
-  await page.getByLabel(...InstanceTypesCreatePage.description).fill(description);
+  await page.locator(...InstanceTypesCreatePage.name).fill(name);
+  await page.locator(...InstanceTypesCreatePage.description).fill(description);
 
   // Set vCPUs and memory by clicking each field's Plus button.
   await setNumberWithPlusButton(page.locator(...InstanceTypesCreatePage.vcpusPlus), vcpus, 'vCPUs');
@@ -170,10 +170,8 @@ export const createInstanceType = async (
     memoryGib,
     'Memory (GiB)',
   );
-  await expect(page.getByLabel(...InstanceTypesCreatePage.vcpus)).toHaveValue(String(vcpus));
-  await expect(page.getByLabel(...InstanceTypesCreatePage.memoryGib)).toHaveValue(
-    String(memoryGib),
-  );
+  await expect(page.locator(...InstanceTypesCreatePage.vcpus)).toHaveValue(String(vcpus));
+  await expect(page.locator(...InstanceTypesCreatePage.memoryGib)).toHaveValue(String(memoryGib));
 
   if (gpu) {
     // Fill all GPU fields when GPU data is supplied.
@@ -182,17 +180,13 @@ export const createInstanceType = async (
       gpu.count,
       'GPU count',
     );
-    await page.getByLabel(...InstanceTypesCreatePage.gpuResourceName).fill(gpu.resourceName);
-    await page
-      .getByLabel(...InstanceTypesCreatePage.gpuPciDeviceSelector)
-      .fill(gpu.pciDeviceSelector);
-    await expect(page.getByLabel(...InstanceTypesCreatePage.gpuCount)).toHaveValue(
-      String(gpu.count),
-    );
+    await page.locator(...InstanceTypesCreatePage.gpuResourceName).fill(gpu.resourceName);
+    await page.locator(...InstanceTypesCreatePage.gpuPciDeviceSelector).fill(gpu.pciDeviceSelector);
+    await expect(page.locator(...InstanceTypesCreatePage.gpuCount)).toHaveValue(String(gpu.count));
   }
 
   // Submit the instance type creation form.
-  await page.getByRole(...InstanceTypesCreatePage.create).click();
+  await page.locator(...InstanceTypesCreatePage.create).click();
 
   // Verify that the created instance type opens with all supplied data.
   await expectInstanceTypeCreated(page, name, description, vcpus, memoryGib, gpu);
@@ -220,7 +214,7 @@ export const expectInstanceTypeCreated = async (
   }
 
   // Verify the requested values and Active lifecycle state in the Details card.
-  const detailsCard = page.locator(...InstanceTypesDetailPage.cards).filter({ hasText: 'Details' });
+  const detailsCard = page.locator(...InstanceTypesDetailPage.detailsCard);
   await expect(detailsCard).toHaveCount(1);
   await expectDetailValue(detailsCard, 'Name', name);
   await expectDetailValue(detailsCard, 'vCPUs', String(vcpus));
@@ -228,7 +222,7 @@ export const expectInstanceTypeCreated = async (
   await expectDetailValue(detailsCard, 'Lifecycle state', 'Active');
 
   // Verify either the supplied GPU values or the no-GPU state.
-  const gpuCard = page.locator(...InstanceTypesDetailPage.cards).filter({ hasText: 'GPU' });
+  const gpuCard = page.locator(...InstanceTypesDetailPage.gpuCard);
   await expect(gpuCard).toHaveCount(1);
   if (gpu) {
     await expectDetailValue(gpuCard, 'Count', String(gpu.count));
@@ -249,7 +243,7 @@ export const expectInstanceTypeListed = async (
 ): Promise<void> => {
   // Click the Instance types breadcrumb on the detail page, not the sidebar menu item.
   await page.getByRole(...InstanceTypesDetailPage.instanceTypesBreadcrumb).click();
-  await expect(page.getByRole(...InstanceTypesMainPage.pageTitle)).toBeVisible();
+  await expect(page.locator(...InstanceTypesMainPage.pageTitle)).toBeVisible();
 
   // Locate the created row by its exact name.
   const instanceTypeRow = getInstanceTypeRow(page, name);

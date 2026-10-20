@@ -1,0 +1,31 @@
+export const instanceTypeFieldIds = {
+  name: 'metadata-name',
+  description: 'instance-type-description',
+  vcpus: 'instance-type-vcpus',
+  memoryGib: 'instance-type-memory-gib',
+  gpuCount: 'instance-type-gpu-count',
+  gpuResourceName: 'instance-type-gpu-resource-name',
+  gpuPciDeviceSelector: 'instance-type-gpu-pci-device-selector',
+} as const;
+
+export const instanceTypeTestIds = {
+  listPageTitle: 'instance-types-page-title',
+  listCreateButton: 'instance-types-create-button',
+  table: 'instance-types-table',
+  emptyState: 'instance-types-empty-state',
+  row: 'instance-type-row',
+  nameCell: 'instance-type-name-cell',
+  lifecycleCell: 'instance-type-lifecycle-cell',
+  vcpusCell: 'instance-type-vcpus-cell',
+  memoryGibCell: 'instance-type-memory-gib-cell',
+  gpusCell: 'instance-type-gpus-cell',
+  actionsToggle: 'instance-type-actions-toggle',
+  createPageTitle: 'instance-type-create-page-title',
+  createBreadcrumb: 'instance-type-create-breadcrumb',
+  createButton: 'instance-type-create-button',
+  cancelButton: 'instance-type-cancel-button',
+  detailPageTitle: 'instance-type-detail-page-title',
+  detailDescription: 'instance-type-detail-description',
+  detailsCard: 'instance-type-details-card',
+  gpuCard: 'instance-type-gpu-card',
+} as const;

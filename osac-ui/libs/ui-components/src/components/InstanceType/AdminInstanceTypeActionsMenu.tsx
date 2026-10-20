@@ -6,6 +6,7 @@ import { InstanceTypeState, type InstanceType as PrivateInstanceType } from '@os
 import DeleteResourceButton from '@osac/ui-components/components/Resource/DeleteResourceButton';
 
 import InstanceTypeDeleteConfirmModal from './InstanceTypeDeleteConfirmModal';
+import { instanceTypeTestIds } from './testIds';
 import {
   getInstanceTypeLifecycleActions,
   useInstanceTypeLifecycleAction,
@@ -46,6 +47,7 @@ const AdminInstanceTypeActionsMenu = ({ instanceType }: AdminInstanceTypeActions
             variant="plain"
             onClick={() => setOpen((o) => !o)}
             aria-label={t('Actions for {{name}}', { name })}
+            data-testid={instanceTypeTestIds.actionsToggle}
           >
             <EllipsisVIcon />
           </MenuToggle>

@@ -28,6 +28,7 @@ import DeleteResourceButton from '@osac/ui-components/components/Resource/Delete
 
 import InstanceTypeDeleteConfirmModal from './InstanceTypeDeleteConfirmModal';
 import InstanceTypeLifecycleLabel from './InstanceTypeLifecycleLabel';
+import { instanceTypeTestIds } from './testIds';
 import {
   getInstanceTypeLifecycleActions,
   useInstanceTypeLifecycleAction,
@@ -122,7 +123,9 @@ const AdminInstanceTypeDetailPage = () => {
   return (
     <ListPage
       title={name}
+      titleTestId={instanceTypeTestIds.detailPageTitle}
       description={instanceType?.spec?.description}
+      descriptionTestId={instanceTypeTestIds.detailDescription}
       actions={
         instanceType && (
           <InstanceTypeDetailActions
@@ -145,7 +148,7 @@ const AdminInstanceTypeDetailPage = () => {
       <ListPageBody isLoading={isLoading} error={error}>
         <Stack hasGutter>
           <StackItem>
-            <Card>
+            <Card data-testid={instanceTypeTestIds.detailsCard}>
               <CardTitle>{t('Details')}</CardTitle>
               <CardBody>
                 <DescriptionList isCompact columnModifier={{ default: '2Col' }}>
@@ -189,7 +192,7 @@ const AdminInstanceTypeDetailPage = () => {
           </StackItem>
 
           <StackItem>
-            <Card>
+            <Card data-testid={instanceTypeTestIds.gpuCard}>
               <CardTitle>{t('GPU')}</CardTitle>
               <CardBody>
                 {gpu ? (
