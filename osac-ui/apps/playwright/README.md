@@ -113,7 +113,54 @@ against an existing obsolete image, use
 Each run appends a unique suffix to `disk_image.name`, and the full name appears
 in the test title. To clean up an interrupted run, set
 `OSAC_DISK_IMAGE_TEST_RUN_ID` to that run's suffix when invoking the delete
-project.
+ project.
+
+### Catalog CLI flow tests
+
+The catalog flow runs the `osac` CLI from Playwright. Authenticate the CLI
+against the target environment before starting the test, for example with
+`osac login`. The browser login variables are not used by this flow, but
+`OSAC_UI_BASE_URL` is still required by the Playwright configuration.
+
+Required variables:
+
+| Variable                         | Description                                                       |
+| -------------------------------- | ----------------------------------------------------------------- |
+| `OSAC_CATALOG_ITEM_NAME`         | Unique catalog item name to create and delete                     |
+| `OSAC_COMPUTE_INSTANCE_TEMPLATE` | Existing compute instance template referenced by the catalog item |
+
+Optional variables:
+
+| Variable                        | Description                                                                             |
+| ------------------------------- | --------------------------------------------------------------------------------------- |
+| `OSAC_CLI_PATH`                 | Path to the `osac` executable; defaults to `osac` from `PATH`                           |
+| `OSAC_CLI_CONFIG`               | CLI configuration directory; when unset, the CLI uses its normal configuration location |
+| `OSAC_CATALOG_ITEM_TITLE`       | Catalog title; defaults to `CLI catalog item`                                           |
+| `OSAC_CATALOG_ITEM_DESCRIPTION` | Catalog description; defaults to a test description                                     |
+
+Run creation and deletion together. The delete project depends on the create
+project, and each CLI command is followed by a JSON lookup that verifies its
+result:
+
+```bash
+export OSAC_UI_BASE_URL=https://osac-ui-<namespace>.<cluster-domain>
+export OSAC_CATALOG_ITEM_NAME=catalog-item-e2e
+export OSAC_COMPUTE_INSTANCE_TEMPLATE=osac.templates.ocp_virt_vm
+export OSAC_CLI_CONFIG="$HOME/.config/osac"
+
+pnpm --filter @osac/playwright exec playwright test \
+  --project=vmaas-catalog-delete
+```
+
+Run the flows separately:
+
+```bash
+pnpm --filter @osac/playwright exec playwright test \
+  create.catalog.spec.ts --project=vmaas-catalog
+
+pnpm --filter @osac/playwright exec playwright test \
+  delete.catalog.spec.ts --project=vmaas-catalog-delete --no-deps
+```
 
 Use `--headed` when a graphical display is available. Run these commands from
 the repository root; pass only the spec filename because the Playwright
