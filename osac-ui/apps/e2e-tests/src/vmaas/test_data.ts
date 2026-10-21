@@ -24,7 +24,18 @@ interface RawInstanceType {
 }
 
 interface RawExtravars {
+  catalog_item_description: string;
+  catalog_item_name: string;
+  catalog_item_title: string;
+  compute_instance_template: string;
   instance_type: RawInstanceType;
+}
+
+export interface CatalogTestData {
+  description: string;
+  name: string;
+  template: string;
+  title: string;
 }
 
 export interface InstanceTypeTestData {
@@ -41,9 +52,16 @@ const extravarsPath = path.resolve(
   '../../extravars.yaml',
 );
 
-const { instance_type: rawInstanceType } = parse(
-  readFileSync(extravarsPath, 'utf8'),
-) as RawExtravars;
+const rawExtravars = parse(readFileSync(extravarsPath, 'utf8')) as RawExtravars;
+
+const { instance_type: rawInstanceType } = rawExtravars;
+
+export const catalogTestData: CatalogTestData = {
+  description: rawExtravars.catalog_item_description,
+  name: rawExtravars.catalog_item_name,
+  template: rawExtravars.compute_instance_template,
+  title: rawExtravars.catalog_item_title,
+};
 
 export const instanceTypeTestData: InstanceTypeTestData = {
   name: rawInstanceType.name,

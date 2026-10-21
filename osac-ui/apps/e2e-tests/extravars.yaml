@@ -5,6 +5,11 @@
 
 tenant_name: 'tenant1'
 
+catalog_item_name: 'catalog-item-e2e'
+compute_instance_template: 'osac.templates.ocp_virt_vm'
+catalog_item_title: 'CLI catalog item'
+catalog_item_description: 'CLI-created catalog item for E2E testing.'
+
 instance_type:
   name: 'instance-type-e2e'
   description: 'Instance type created by e2e test'
