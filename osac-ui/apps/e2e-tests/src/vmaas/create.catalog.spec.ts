@@ -1,26 +1,18 @@
 import { expect, test } from '@playwright/test';
 
-import {
-  expectOsacCommandSucceeded,
-  getCatalogItems,
-  getCatalogTestConfiguration,
-  runOsacCommand,
-} from './catalog.cli';
+import { catalogTestData } from './test_data';
+import { getCatalogItems } from '../../../../libs/osac-cli/src/catalog';
+import { expectOsacCommandSucceeded, runOsacCommand } from '../../../../libs/osac-cli/src/cli';
 
 test('creates a catalog item with the osac CLI', async () => {
   test.setTimeout(180_000);
 
-  const configuration = getCatalogTestConfiguration();
-  if (!configuration) {
-    test.skip(true, 'OSAC_CATALOG_ITEM_NAME and OSAC_COMPUTE_INSTANCE_TEMPLATE must be set.');
-    return;
-  }
-
   // Verify the name is available before attempting creation.
-  const existingItems = await getCatalogItems(configuration.name);
+  const existingItems = await getCatalogItems(catalogTestData.name);
   if (existingItems.length !== 0) {
     throw new Error(
-      `Catalog item '${configuration.name}' already exists. Choose another OSAC_CATALOG_ITEM_NAME.`,
+      `Catalog item '${catalogTestData.name}' already exists. ` +
+        'Choose another catalog_item_name in extravars.yaml.',
     );
   }
 
@@ -29,22 +21,22 @@ test('creates a catalog item with the osac CLI', async () => {
     'create',
     'computeinstancecatalogitem',
     '--name',
-    configuration.name,
+    catalogTestData.name,
     '--title',
-    configuration.title,
+    catalogTestData.title,
     '--description',
-    configuration.description,
+    catalogTestData.description,
     '--template',
-    configuration.template,
+    catalogTestData.template,
     '--published',
   ]);
-  expectOsacCommandSucceeded(createResult, `Create catalog item '${configuration.name}'`);
+  expectOsacCommandSucceeded(createResult, `Create catalog item '${catalogTestData.name}'`);
 
   // Verify the created object and its user-visible metadata through the CLI.
-  const createdItems = await getCatalogItems(configuration.name);
+  const createdItems = await getCatalogItems(catalogTestData.name);
   expect(createdItems).toHaveLength(1);
-  expect(createdItems[0]?.metadata?.name).toBe(configuration.name);
-  expect(createdItems[0]?.title).toBe(configuration.title);
-  expect(createdItems[0]?.description).toBe(configuration.description);
+  expect(createdItems[0]?.metadata?.name).toBe(catalogTestData.name);
+  expect(createdItems[0]?.title).toBe(catalogTestData.title);
+  expect(createdItems[0]?.description).toBe(catalogTestData.description);
   expect(createdItems[0]?.template?.id).toBeTruthy();
 });

@@ -122,12 +122,14 @@ against the target environment before starting the test, for example with
 `osac login`. The browser login variables are not used by this flow, but
 `OSAC_UI_BASE_URL` is still required by the Playwright configuration.
 
-Required variables:
+The catalog configuration is in `apps/e2e-tests/extravars.yaml`:
 
-| Variable                         | Description                                                       |
-| -------------------------------- | ----------------------------------------------------------------- |
-| `OSAC_CATALOG_ITEM_NAME`         | Unique catalog item name to create and delete                     |
-| `OSAC_COMPUTE_INSTANCE_TEMPLATE` | Existing compute instance template referenced by the catalog item |
+| Parameter                   | Description                                                       |
+| --------------------------- | ----------------------------------------------------------------- |
+| `catalog_item_name`         | Unique catalog item name to create and delete                    |
+| `compute_instance_template` | Existing compute instance template referenced by the catalog item |
+| `catalog_item_title`        | Catalog title                                                    |
+| `catalog_item_description`  | Catalog description                                              |
 
 Optional variables:
 
@@ -135,8 +137,6 @@ Optional variables:
 | ------------------------------- | --------------------------------------------------------------------------------------- |
 | `OSAC_CLI_PATH`                 | Path to the `osac` executable; defaults to `osac` from `PATH`                           |
 | `OSAC_CLI_CONFIG`               | CLI configuration directory; when unset, the CLI uses its normal configuration location |
-| `OSAC_CATALOG_ITEM_TITLE`       | Catalog title; defaults to `CLI catalog item`                                           |
-| `OSAC_CATALOG_ITEM_DESCRIPTION` | Catalog description; defaults to a test description                                     |
 
 Run creation and deletion together. The delete project depends on the create
 project, and each CLI command is followed by a JSON lookup that verifies its
@@ -144,8 +144,6 @@ result:
 
 ```bash
 export OSAC_UI_BASE_URL=https://osac-ui-<namespace>.<cluster-domain>
-export OSAC_CATALOG_ITEM_NAME=catalog-item-e2e
-export OSAC_COMPUTE_INSTANCE_TEMPLATE=osac.templates.ocp_virt_vm
 export OSAC_CLI_CONFIG="$HOME/.config/osac"
 
 pnpm --filter @osac/playwright exec playwright test \

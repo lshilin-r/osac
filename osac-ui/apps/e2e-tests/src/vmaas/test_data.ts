@@ -35,10 +35,21 @@ interface RawDiskImage {
 }
 
 interface RawExtravars {
+  catalog_item_description: string;
+  catalog_item_name: string;
+  catalog_item_title: string;
+  compute_instance_template: string;
   instance_type: RawInstanceType;
   disk_image: RawDiskImage;
   lifecycle_actions: LifecycleAction[];
   tenant_name?: string;
+}
+
+export interface CatalogTestData {
+  description: string;
+  name: string;
+  template: string;
+  title: string;
 }
 
 export interface InstanceTypeTestData {
@@ -134,6 +145,16 @@ const parseExtravars = (value: unknown): RawExtravars => {
     instanceType.gpu === undefined ? undefined : asRecord(instanceType.gpu, 'instance_type.gpu');
 
   return {
+    catalog_item_description: requiredString(
+      root.catalog_item_description,
+      'catalog_item_description',
+    ),
+    catalog_item_name: requiredString(root.catalog_item_name, 'catalog_item_name'),
+    catalog_item_title: requiredString(root.catalog_item_title, 'catalog_item_title'),
+    compute_instance_template: requiredString(
+      root.compute_instance_template,
+      'compute_instance_template',
+    ),
     tenant_name: optionalString(root.tenant_name, 'tenant_name'),
     instance_type: {
       name: requiredString(instanceType.name, 'instance_type.name'),
@@ -170,12 +191,14 @@ const extravarsPath = path.resolve(
   '../../extravars.yaml',
 );
 
+const rawExtravars = parseExtravars(parse(readFileSync(extravarsPath, 'utf8')));
+
 const {
   instance_type: rawInstanceType,
   disk_image: rawDiskImage,
   lifecycle_actions: rawLifecycleActions,
   tenant_name: rawTenantName,
-} = parseExtravars(parse(readFileSync(extravarsPath, 'utf8')));
+} = rawExtravars;
 const diskImageTestRunId = requiredString(
   process.env.OSAC_DISK_IMAGE_TEST_RUN_ID,
   'OSAC_DISK_IMAGE_TEST_RUN_ID',
@@ -190,6 +213,13 @@ export const tenantNameOrSkip = (): string | undefined => {
 
   test.skip(true, 'tenant_name is not set in apps/e2e-tests/extravars.yaml.');
   return undefined;
+};
+
+export const catalogTestData: CatalogTestData = {
+  description: rawExtravars.catalog_item_description,
+  name: rawExtravars.catalog_item_name,
+  template: rawExtravars.compute_instance_template,
+  title: rawExtravars.catalog_item_title,
 };
 
 export const instanceTypeTestData: InstanceTypeTestData = {

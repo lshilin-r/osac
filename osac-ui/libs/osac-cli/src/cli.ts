@@ -4,19 +4,6 @@ import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
 
-export const catalogItemResource = 'computeinstancecatalogitems';
-
-export interface CatalogItem {
-  description?: string;
-  metadata?: {
-    name?: string;
-  };
-  template?: {
-    id?: string;
-  };
-  title?: string;
-}
-
 export interface OsacCommandResult {
   exitCode: number;
   stderr: string;
@@ -64,44 +51,4 @@ export const expectOsacCommandSucceeded = (
     result.exitCode,
     `${description} failed.\nstdout: ${result.stdout}\nstderr: ${result.stderr}`,
   ).toBe(0);
-};
-
-export const getCatalogItems = async (name: string): Promise<CatalogItem[]> => {
-  const result = await runOsacCommand(['get', catalogItemResource, name, '--output', 'json']);
-  expectOsacCommandSucceeded(result, `Get catalog item '${name}'`);
-
-  const parsed: unknown = JSON.parse(result.stdout);
-  if (Array.isArray(parsed)) {
-    return parsed as CatalogItem[];
-  }
-  if (parsed !== null && typeof parsed === 'object') {
-    return [parsed as CatalogItem];
-  }
-
-  throw new Error(
-    `The CLI returned an unexpected JSON response while getting catalog item '${name}'.`,
-  );
-};
-
-export const getCatalogTestConfiguration = ():
-  | {
-      description: string;
-      name: string;
-      template: string;
-      title: string;
-    }
-  | undefined => {
-  const name = process.env.OSAC_CATALOG_ITEM_NAME;
-  const template = process.env.OSAC_COMPUTE_INSTANCE_TEMPLATE;
-  if (!name || !template) {
-    return undefined;
-  }
-
-  return {
-    description:
-      process.env.OSAC_CATALOG_ITEM_DESCRIPTION ?? 'CLI-created catalog item for E2E testing.',
-    name,
-    template,
-    title: process.env.OSAC_CATALOG_ITEM_TITLE ?? 'CLI catalog item',
-  };
 };
