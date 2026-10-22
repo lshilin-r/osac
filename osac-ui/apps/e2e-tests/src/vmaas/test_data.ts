@@ -103,6 +103,11 @@ const rawExtravars = parse(readFileSync(extravarsPath, 'utf8')) as RawExtravars;
 const { catalog: rawCatalog } = rawExtravars;
 const { instance_type: rawInstanceType } = rawExtravars;
 
+const catalogName = rawCatalog.name?.trim();
+if (!catalogName) {
+  throw new Error('catalog.name must be set in extravars.yaml');
+}
+
 export const catalogTestData: CatalogTestData = {
   description: rawCatalog.description,
   fields: {
@@ -120,7 +125,7 @@ export const catalogTestData: CatalogTestData = {
       shared: rawCatalog.fields.disk_image.shared,
     },
   },
-  name: rawCatalog.name,
+  name: catalogName,
   status: rawCatalog.status,
   template: rawCatalog.template,
   title: rawCatalog.title,
