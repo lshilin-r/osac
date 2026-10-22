@@ -21,3 +21,8 @@ export const expectCatalogItemListed = async (page: Page, name: string): Promise
     'Global public',
   );
 };
+
+/** Verify that a catalog item is absent from the Catalog page. */
+export const expectCatalogItemNotListed = async (page: Page, name: string): Promise<void> => {
+  await expect(getCatalogItemCard(page, name)).toHaveCount(0);
+};

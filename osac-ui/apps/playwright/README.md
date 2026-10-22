@@ -140,8 +140,8 @@ Optional variables:
 | `OSAC_CLI_CONFIG`               | CLI configuration directory; when unset, the CLI uses its normal configuration location |
 
 Run creation and deletion together. The delete project depends on the create
-project, and each CLI command is followed by a JSON lookup that verifies its
-result:
+project, and each CLI operation is followed by a JSON lookup and a browser
+check of the Catalog page:
 
 ```bash
 export OSAC_UI_BASE_URL=https://osac-ui-<namespace>.<cluster-domain>
