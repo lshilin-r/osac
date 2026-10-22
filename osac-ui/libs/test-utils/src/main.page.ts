@@ -66,5 +66,6 @@ export const openInstanceTypesPage = async (page: Page): Promise<void> => {
 export const openCatalogPage = async (page: Page): Promise<void> => {
   await openMainPageOption(page, 'catalog');
 
+  await expect(page).toHaveURL(/\/catalog(?:\?.*)?$/);
   await expect(page.getByRole(...CatalogMainPage.pageTitle)).toBeVisible();
 };
