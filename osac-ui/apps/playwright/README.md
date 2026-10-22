@@ -105,19 +105,24 @@ the browser verification.
 
 The catalog configuration is in `apps/e2e-tests/extravars.yaml`:
 
-| Parameter                   | Description                                                       |
-| --------------------------- | ----------------------------------------------------------------- |
-| `catalog_item_name`         | Unique catalog item name to create and delete                    |
-| `compute_instance_template` | Existing compute instance template referenced by the catalog item |
-| `catalog_item_title`        | Catalog title                                                    |
-| `catalog_item_description`  | Catalog description                                              |
+| Parameter                                 | Description                                                       |
+| ----------------------------------------- | ----------------------------------------------------------------- |
+| `catalog.name`                            | Unique catalog item name to create and delete                     |
+| `catalog.template`                        | Existing compute instance template referenced by the catalog item |
+| `catalog.title`                           | Catalog title                                                     |
+| `catalog.description`                     | Catalog description                                               |
+| `catalog.fields.instance_type.name`       | Existing instance type referenced by the catalog item             |
+| `catalog.fields.instance_type.vcpus`      | Expected vCPU value displayed for the referenced instance type    |
+| `catalog.fields.instance_type.memory_gib` | Expected memory value displayed for the referenced instance type  |
+| `catalog.fields.boot_disk.size_gib`       | Boot-disk storage value displayed for the catalog item            |
+| `catalog.fields.disk_image.name`          | Existing disk image referenced by the catalog item                |
 
 Optional variables:
 
-| Variable                        | Description                                                                             |
-| ------------------------------- | --------------------------------------------------------------------------------------- |
-| `OSAC_CLI_PATH`                 | Path to the `osac` executable; defaults to `osac` from `PATH`                           |
-| `OSAC_CLI_CONFIG`               | CLI configuration directory; when unset, the CLI uses its normal configuration location |
+| Variable          | Description                                                                             |
+| ----------------- | --------------------------------------------------------------------------------------- |
+| `OSAC_CLI_PATH`   | Path to the `osac` executable; defaults to `osac` from `PATH`                           |
+| `OSAC_CLI_CONFIG` | CLI configuration directory; when unset, the CLI uses its normal configuration location |
 
 Run creation and deletion together. The delete project depends on the create
 project, and each CLI operation is followed by a JSON lookup and a browser

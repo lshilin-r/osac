@@ -2,8 +2,35 @@ import { expectOsacCommandSucceeded, runOsacCommand } from './cli';
 
 export const catalogItemResource = 'computeinstancecatalogitems';
 
+export interface CatalogItemReference {
+  name?: string;
+  shared?: boolean;
+}
+
+export interface CatalogItemFields {
+  instance_type?: {
+    editable?: {
+      default_value?: CatalogItemReference;
+    };
+  };
+  boot_disk?: {
+    size_gib?: {
+      editable?: {
+        default_value?: number;
+      };
+    };
+  };
+  disk_image?: {
+    locked?: CatalogItemReference;
+    editable?: {
+      default_value?: CatalogItemReference;
+    };
+  };
+}
+
 export interface CatalogItem {
   description?: string;
+  fields?: CatalogItemFields;
   metadata?: {
     name?: string;
   };

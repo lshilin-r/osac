@@ -23,19 +23,59 @@ interface RawInstanceType {
   lifecycle_actions: InstanceTypeLifecycleAction[];
 }
 
+interface RawCatalogInstanceTypeField {
+  name: string;
+  shared: boolean;
+  vcpus: number;
+  memory_gib: number;
+}
+
+interface RawCatalogFields {
+  instance_type: RawCatalogInstanceTypeField;
+  boot_disk: {
+    size_gib: number;
+  };
+  disk_image: {
+    name: string;
+    shared: boolean;
+  };
+}
+
+interface RawCatalog {
+  name: string;
+  template: string;
+  title: string;
+  description: string;
+  type: string;
+  status: string;
+  usage: string;
+  fields: RawCatalogFields;
+}
+
 interface RawExtravars {
-  catalog_status: string;
-  catalog_type: string;
-  catalog_usage: string;
-  catalog_item_description: string;
-  catalog_item_name: string;
-  catalog_item_title: string;
-  compute_instance_template: string;
+  catalog: RawCatalog;
   instance_type: RawInstanceType;
+}
+
+export interface CatalogFieldsTestData {
+  instanceType: {
+    name: string;
+    shared: boolean;
+    vcpus: number;
+    memoryGib: number;
+  };
+  bootDisk: {
+    sizeGib: number;
+  };
+  diskImage: {
+    name: string;
+    shared: boolean;
+  };
 }
 
 export interface CatalogTestData {
   description: string;
+  fields: CatalogFieldsTestData;
   name: string;
   status: string;
   template: string;
@@ -60,16 +100,32 @@ const extravarsPath = path.resolve(
 
 const rawExtravars = parse(readFileSync(extravarsPath, 'utf8')) as RawExtravars;
 
+const { catalog: rawCatalog } = rawExtravars;
 const { instance_type: rawInstanceType } = rawExtravars;
 
 export const catalogTestData: CatalogTestData = {
-  description: rawExtravars.catalog_item_description,
-  name: rawExtravars.catalog_item_name,
-  status: rawExtravars.catalog_status,
-  template: rawExtravars.compute_instance_template,
-  title: rawExtravars.catalog_item_title,
-  type: rawExtravars.catalog_type,
-  usage: rawExtravars.catalog_usage,
+  description: rawCatalog.description,
+  fields: {
+    instanceType: {
+      name: rawCatalog.fields.instance_type.name,
+      shared: rawCatalog.fields.instance_type.shared,
+      vcpus: rawCatalog.fields.instance_type.vcpus,
+      memoryGib: rawCatalog.fields.instance_type.memory_gib,
+    },
+    bootDisk: {
+      sizeGib: rawCatalog.fields.boot_disk.size_gib,
+    },
+    diskImage: {
+      name: rawCatalog.fields.disk_image.name,
+      shared: rawCatalog.fields.disk_image.shared,
+    },
+  },
+  name: rawCatalog.name,
+  status: rawCatalog.status,
+  template: rawCatalog.template,
+  title: rawCatalog.title,
+  type: rawCatalog.type,
+  usage: rawCatalog.usage,
 };
 
 export const instanceTypeTestData: InstanceTypeTestData = {
