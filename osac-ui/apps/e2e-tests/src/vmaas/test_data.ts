@@ -306,6 +306,11 @@ if (!catalogName) {
   throw new Error('catalog.name must be set in extravars.yaml');
 }
 
+const catalogName = rawCatalog.name?.trim();
+if (!catalogName) {
+  throw new Error('catalog.name must be set in extravars.yaml');
+}
+
 export const catalogTestData: CatalogTestData = {
   description: rawCatalog.description,
   fields: {
