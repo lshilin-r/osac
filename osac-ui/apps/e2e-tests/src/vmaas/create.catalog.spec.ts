@@ -3,8 +3,11 @@ import { expect, test } from '@playwright/test';
 import { catalogTestData } from './test_data';
 import { getCatalogItems } from '../../../../libs/osac-cli/src/catalog';
 import { expectOsacCommandSucceeded, runOsacCommand } from '../../../../libs/osac-cli/src/cli';
+import { expectCatalogItemListed } from '../../../../libs/test-utils/src/catalog.page';
+import { openAndLoginWithEnvironment } from '../../../../libs/test-utils/src/general/open_and_login';
+import { openCatalogPage } from '../../../../libs/test-utils/src/main.page';
 
-test('creates a catalog item with the osac CLI', async () => {
+test('creates a catalog item with the osac CLI and lists it in Catalog', async ({ page }) => {
   test.setTimeout(180_000);
 
   // Verify the name is available before attempting creation.
@@ -39,4 +42,9 @@ test('creates a catalog item with the osac CLI', async () => {
   expect(createdItems[0]?.title).toBe(catalogTestData.title);
   expect(createdItems[0]?.description).toBe(catalogTestData.description);
   expect(createdItems[0]?.template?.id).toBeTruthy();
+
+  // Open the browser, authenticate, and verify the created catalog item in the UI.
+  await openAndLoginWithEnvironment(page, '/');
+  await openCatalogPage(page);
+  await expectCatalogItemListed(page, catalogTestData.name);
 });
