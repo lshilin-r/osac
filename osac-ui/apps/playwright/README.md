@@ -117,10 +117,11 @@ in the test title. To clean up an interrupted run, set
 
 ### Catalog CLI flow tests
 
-The catalog flow runs the `osac` CLI from Playwright. Authenticate the CLI
-against the target environment before starting the test, for example with
-`osac login`. The browser login variables are not used by this flow, but
-`OSAC_UI_BASE_URL` is still required by the Playwright configuration.
+The catalog flow runs the `osac` CLI from Playwright, then opens the live UI,
+logs in, and verifies the created item on the Catalog page. Authenticate the
+CLI against the target environment before starting the test, for example with
+`osac login`. Set `OSAC_UI_BASE_URL`, `OSAC_USERNAME`, and `OSAC_PASSWORD` for
+the browser verification.
 
 The catalog configuration is in `apps/e2e-tests/extravars.yaml`:
 
