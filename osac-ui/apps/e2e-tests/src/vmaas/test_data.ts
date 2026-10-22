@@ -34,22 +34,62 @@ interface RawDiskImage {
   scope: string;
 }
 
+interface RawCatalogInstanceTypeField {
+  name: string;
+  shared: boolean;
+  vcpus: number;
+  memory_gib: number;
+}
+
+interface RawCatalogFields {
+  instance_type: RawCatalogInstanceTypeField;
+  boot_disk: {
+    size_gib: number;
+  };
+  disk_image: {
+    name: string;
+    shared: boolean;
+  };
+}
+
+interface RawCatalog {
+  name: string;
+  template: string;
+  title: string;
+  description: string;
+  type: string;
+  status: string;
+  usage: string;
+  fields: RawCatalogFields;
+}
+
 interface RawExtravars {
-  catalog_status: string;
-  catalog_type: string;
-  catalog_usage: string;
-  catalog_item_description: string;
-  catalog_item_name: string;
-  catalog_item_title: string;
-  compute_instance_template: string;
+  catalog: RawCatalog;
   instance_type: RawInstanceType;
   disk_image: RawDiskImage;
   lifecycle_actions: LifecycleAction[];
   tenant_name?: string;
 }
 
+export interface CatalogFieldsTestData {
+  instanceType: {
+    name: string;
+    shared: boolean;
+    vcpus: number;
+    memoryGib: number;
+  };
+  bootDisk: {
+    sizeGib: number;
+  };
+  diskImage: {
+    name: string;
+    shared: boolean;
+  };
+}
+
 export interface CatalogTestData {
   description: string;
+  fields: CatalogFieldsTestData;
   name: string;
   status: string;
   template: string;
@@ -84,6 +124,14 @@ const asRecord = (value: unknown, field: string): Record<string, unknown> => {
 const requiredString = (value: unknown, field: string): string => {
   if (typeof value !== 'string' || value.trim().length === 0) {
     throw new Error(`Invalid e2e extravars: ${field} must be a non-empty string.`);
+  }
+
+  return value;
+};
+
+const requiredBoolean = (value: unknown, field: string): boolean => {
+  if (typeof value !== 'boolean') {
+    throw new Error(`Invalid e2e extravars: ${field} must be a boolean.`);
   }
 
   return value;
@@ -145,22 +193,53 @@ const lifecycleActions = (value: unknown): LifecycleAction[] => {
 
 const parseExtravars = (value: unknown): RawExtravars => {
   const root = asRecord(value, 'root');
+  const catalog = asRecord(root.catalog, 'catalog');
+  const catalogFields = asRecord(catalog.fields, 'catalog.fields');
+  const catalogInstanceType = asRecord(
+    catalogFields.instance_type,
+    'catalog.fields.instance_type',
+  );
+  const catalogBootDisk = asRecord(catalogFields.boot_disk, 'catalog.fields.boot_disk');
+  const catalogDiskImage = asRecord(catalogFields.disk_image, 'catalog.fields.disk_image');
   const instanceType = asRecord(root.instance_type, 'instance_type');
   const diskImage = asRecord(root.disk_image, 'disk_image');
   const gpu =
     instanceType.gpu === undefined ? undefined : asRecord(instanceType.gpu, 'instance_type.gpu');
 
   return {
-    catalog_item_description: requiredString(
-      root.catalog_item_description,
-      'catalog_item_description',
-    ),
-    catalog_item_name: requiredString(root.catalog_item_name, 'catalog_item_name'),
-    catalog_item_title: requiredString(root.catalog_item_title, 'catalog_item_title'),
-    compute_instance_template: requiredString(
-      root.compute_instance_template,
-      'compute_instance_template',
-    ),
+    catalog: {
+      name: requiredString(catalog.name, 'catalog.name'),
+      template: requiredString(catalog.template, 'catalog.template'),
+      title: requiredString(catalog.title, 'catalog.title'),
+      description: requiredString(catalog.description, 'catalog.description'),
+      type: requiredString(catalog.type, 'catalog.type'),
+      status: requiredString(catalog.status, 'catalog.status'),
+      usage: requiredString(catalog.usage, 'catalog.usage'),
+      fields: {
+        instance_type: {
+          name: requiredString(catalogInstanceType.name, 'catalog.fields.instance_type.name'),
+          shared: requiredBoolean(
+            catalogInstanceType.shared,
+            'catalog.fields.instance_type.shared',
+          ),
+          vcpus: positiveInteger(
+            catalogInstanceType.vcpus,
+            'catalog.fields.instance_type.vcpus',
+          ),
+          memory_gib: positiveInteger(
+            catalogInstanceType.memory_gib,
+            'catalog.fields.instance_type.memory_gib',
+          ),
+        },
+        boot_disk: {
+          size_gib: positiveInteger(catalogBootDisk.size_gib, 'catalog.fields.boot_disk.size_gib'),
+        },
+        disk_image: {
+          name: requiredString(catalogDiskImage.name, 'catalog.fields.disk_image.name'),
+          shared: requiredBoolean(catalogDiskImage.shared, 'catalog.fields.disk_image.shared'),
+        },
+      },
+    },
     tenant_name: optionalString(root.tenant_name, 'tenant_name'),
     instance_type: {
       name: requiredString(instanceType.name, 'instance_type.name'),
@@ -200,6 +279,7 @@ const extravarsPath = path.resolve(
 const rawExtravars = parseExtravars(parse(readFileSync(extravarsPath, 'utf8')));
 
 const {
+  catalog: rawCatalog,
   instance_type: rawInstanceType,
   disk_image: rawDiskImage,
   lifecycle_actions: rawLifecycleActions,
@@ -221,14 +301,34 @@ export const tenantNameOrSkip = (): string | undefined => {
   return undefined;
 };
 
+const catalogName = rawCatalog.name?.trim();
+if (!catalogName) {
+  throw new Error('catalog.name must be set in extravars.yaml');
+}
+
 export const catalogTestData: CatalogTestData = {
-  description: rawExtravars.catalog_item_description,
-  name: rawExtravars.catalog_item_name,
-  status: rawExtravars.catalog_status,
-  template: rawExtravars.compute_instance_template,
-  title: rawExtravars.catalog_item_title,
-  type: rawExtravars.catalog_type,
-  usage: rawExtravars.catalog_usage,
+  description: rawCatalog.description,
+  fields: {
+    instanceType: {
+      name: rawCatalog.fields.instance_type.name,
+      shared: rawCatalog.fields.instance_type.shared,
+      vcpus: rawCatalog.fields.instance_type.vcpus,
+      memoryGib: rawCatalog.fields.instance_type.memory_gib,
+    },
+    bootDisk: {
+      sizeGib: rawCatalog.fields.boot_disk.size_gib,
+    },
+    diskImage: {
+      name: rawCatalog.fields.disk_image.name,
+      shared: rawCatalog.fields.disk_image.shared,
+    },
+  },
+  name: catalogName,
+  status: rawCatalog.status,
+  template: rawCatalog.template,
+  title: rawCatalog.title,
+  type: rawCatalog.type,
+  usage: rawCatalog.usage,
 };
 
 export const instanceTypeTestData: InstanceTypeTestData = {

@@ -7,6 +7,13 @@ const getCatalogItemCard = (page: Page, name: string): Locator =>
     has: page.getByRole('link', { name, exact: true }),
   });
 
+export interface ExpectedCatalogItemResources {
+  vcpus: number;
+  memoryGib: number;
+  storageGib: number;
+  diskImage: string;
+}
+
 /** Verify that a catalog item is shown with its expected card values. */
 export const expectCatalogItemListed = async (
   page: Page,
@@ -14,6 +21,7 @@ export const expectCatalogItemListed = async (
   expectedType: string,
   expectedStatus: string,
   expectedUsage: string,
+  expectedResources: ExpectedCatalogItemResources,
 ): Promise<void> => {
   const catalogItemCard = getCatalogItemCard(page, name);
 
@@ -26,6 +34,24 @@ export const expectCatalogItemListed = async (
   await expect(catalogItemCard.locator(...CatalogMainPage.catalogItemVisibility)).toContainText(
     expectedUsage,
   );
+
+  const expectedResourceValues = [
+    ['vCPU', `${expectedResources.vcpus} vCPU`],
+    ['Memory', `${expectedResources.memoryGib} GiB`],
+    ['Storage', `${expectedResources.storageGib} GiB`],
+    ['Disk image', expectedResources.diskImage],
+  ] as const;
+
+  for (const [label, value] of expectedResourceValues) {
+    const resourceGroup = catalogItemCard
+      .locator(...CatalogMainPage.catalogItemResourceGroups)
+      .filter({ hasText: label });
+
+    await expect(resourceGroup).toHaveCount(1);
+    await expect(resourceGroup.locator(...CatalogMainPage.catalogItemResourceValue)).toContainText(
+      value,
+    );
+  }
 };
 
 /** Verify that a catalog item is absent from the Catalog page. */
