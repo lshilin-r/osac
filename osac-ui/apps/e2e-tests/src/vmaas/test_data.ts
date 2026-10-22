@@ -24,6 +24,9 @@ interface RawInstanceType {
 }
 
 interface RawExtravars {
+  catalog_status: string;
+  catalog_type: string;
+  catalog_usage: string;
   catalog_item_description: string;
   catalog_item_name: string;
   catalog_item_title: string;
@@ -34,8 +37,11 @@ interface RawExtravars {
 export interface CatalogTestData {
   description: string;
   name: string;
+  status: string;
   template: string;
   title: string;
+  type: string;
+  usage: string;
 }
 
 export interface InstanceTypeTestData {
@@ -59,8 +65,11 @@ const { instance_type: rawInstanceType } = rawExtravars;
 export const catalogTestData: CatalogTestData = {
   description: rawExtravars.catalog_item_description,
   name: rawExtravars.catalog_item_name,
+  status: rawExtravars.catalog_status,
   template: rawExtravars.compute_instance_template,
   title: rawExtravars.catalog_item_title,
+  type: rawExtravars.catalog_type,
+  usage: rawExtravars.catalog_usage,
 };
 
 export const instanceTypeTestData: InstanceTypeTestData = {

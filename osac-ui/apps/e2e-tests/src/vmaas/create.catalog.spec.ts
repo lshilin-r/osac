@@ -46,5 +46,11 @@ test('creates a catalog item with the osac CLI and lists it in Catalog', async (
   // Open the browser, authenticate, and verify the created catalog item in the UI.
   await openAndLoginWithEnvironment(page, '/');
   await openCatalogPage(page);
-  await expectCatalogItemListed(page, catalogTestData.name);
+  await expectCatalogItemListed(
+    page,
+    catalogTestData.name,
+    catalogTestData.type,
+    catalogTestData.status,
+    catalogTestData.usage,
+  );
 });
