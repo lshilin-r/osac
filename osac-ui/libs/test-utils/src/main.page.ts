@@ -1,7 +1,7 @@
 import { type Page, expect } from '@playwright/test';
 
-import { DiskImagesMainPage } from '../../locators/disk_images';
 import { CatalogMainPage } from '../../locators/catalog';
+import { DiskImagesMainPage } from '../../locators/disk_images';
 import { InstanceTypesMainPage } from '../../locators/instance_types';
 import { MainPage } from '../../locators/main_page';
 import { TenantsMainPage } from '../../locators/tenants';

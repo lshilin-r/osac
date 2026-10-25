@@ -195,10 +195,7 @@ const parseExtravars = (value: unknown): RawExtravars => {
   const root = asRecord(value, 'root');
   const catalog = asRecord(root.catalog, 'catalog');
   const catalogFields = asRecord(catalog.fields, 'catalog.fields');
-  const catalogInstanceType = asRecord(
-    catalogFields.instance_type,
-    'catalog.fields.instance_type',
-  );
+  const catalogInstanceType = asRecord(catalogFields.instance_type, 'catalog.fields.instance_type');
   const catalogBootDisk = asRecord(catalogFields.boot_disk, 'catalog.fields.boot_disk');
   const catalogDiskImage = asRecord(catalogFields.disk_image, 'catalog.fields.disk_image');
   const instanceType = asRecord(root.instance_type, 'instance_type');
@@ -222,10 +219,7 @@ const parseExtravars = (value: unknown): RawExtravars => {
             catalogInstanceType.shared,
             'catalog.fields.instance_type.shared',
           ),
-          vcpus: positiveInteger(
-            catalogInstanceType.vcpus,
-            'catalog.fields.instance_type.vcpus',
-          ),
+          vcpus: positiveInteger(catalogInstanceType.vcpus, 'catalog.fields.instance_type.vcpus'),
           memory_gib: positiveInteger(
             catalogInstanceType.memory_gib,
             'catalog.fields.instance_type.memory_gib',
@@ -300,11 +294,6 @@ export const tenantNameOrSkip = (): string | undefined => {
   test.skip(true, 'tenant_name is not set in apps/e2e-tests/extravars.yaml.');
   return undefined;
 };
-
-const catalogName = rawCatalog.name?.trim();
-if (!catalogName) {
-  throw new Error('catalog.name must be set in extravars.yaml');
-}
 
 const catalogName = rawCatalog.name?.trim();
 if (!catalogName) {
