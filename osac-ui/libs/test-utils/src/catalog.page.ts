@@ -31,7 +31,7 @@ export const expectCatalogItemListed = async (
     expectedType,
     expectedStatus,
   ]);
-  await expect(catalogItemCard.locator(...CatalogMainPage.catalogItemVisibility)).toContainText(
+  await expect(catalogItemCard.locator(...CatalogMainPage.catalogItemVisibility)).toHaveText(
     expectedUsage,
   );
 
@@ -48,7 +48,7 @@ export const expectCatalogItemListed = async (
       .filter({ hasText: label });
 
     await expect(resourceGroup).toHaveCount(1);
-    await expect(resourceGroup.locator(...CatalogMainPage.catalogItemResourceValue)).toContainText(
+    await expect(resourceGroup.locator(...CatalogMainPage.catalogItemResourceValue)).toHaveText(
       value,
     );
   }
