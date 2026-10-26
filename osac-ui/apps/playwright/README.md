@@ -29,13 +29,15 @@ pnpm --filter @osac/playwright exec playwright install chromium
 
 ## Running
 
-Required environment variables:
+Environment variables:
 
 | Variable           | Description                                                                                       |
 | ------------------ | ------------------------------------------------------------------------------------------------- |
 | `OSAC_UI_BASE_URL` | Full URL of the `osac-ui` deployment to test, e.g. `https://osac-ui-<namespace>.<cluster-domain>` |
 | `OSAC_USERNAME`    | Username of a Keycloak test user on that deployment's realm                                       |
 | `OSAC_PASSWORD`    | Password for that user                                                                            |
+| `OSAC_USER_TYPE`   | Optional logged-in user type: `admin` or `tenant_type`; defaults to `admin`                       |
+| `OSAC_NEW_PASSWORD` | Optional replacement password for a first-time tenant login                                      |
 
 ```bash
 export OSAC_UI_BASE_URL=https://... OSAC_USERNAME=...
@@ -44,9 +46,12 @@ pnpm playwright
 ```
 
 (`pnpm playwright` is a workspace-root shortcut for `pnpm --filter @osac/playwright
-run playwright`.) None of these have defaults — each is required, so a missing
-value fails immediately with a clear error instead of silently pointing at the
-wrong environment. `pnpm playwright` logs in, runs the [smoke
+run playwright`.) `OSAC_UI_BASE_URL`, `OSAC_USERNAME`, and `OSAC_PASSWORD` are
+required and fail immediately when missing instead of silently pointing at the
+wrong environment. `OSAC_USER_TYPE` defaults to `admin`; set it to
+`tenant_type` for the tenant IdP-manager account. `OSAC_NEW_PASSWORD` is only
+needed when Keycloak requires a first-time password change. `pnpm playwright`
+logs in, runs the [smoke
 test](#smoke-test), and runs every spec under `scratch/` — see [Writing a
 test](#writing-a-test). Tracked UI flows are excluded from this default
 command; select a project explicitly in the [flow instructions](#tenant-flow-tests).
