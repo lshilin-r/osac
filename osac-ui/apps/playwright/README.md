@@ -189,7 +189,6 @@ Each run appends a unique suffix to `disk_image.name`, and the full name appears
 in the test title. To clean up an interrupted run, set
 `OSAC_DISK_IMAGE_TEST_RUN_ID` to that run's suffix when invoking the delete
 project.
-
 ### Instance type flow tests
 
 The instance type tests read their hard-coded test data from
@@ -280,8 +279,8 @@ Optional variables:
 | `OSAC_CLI_PATH`   | Path to the `osac` executable; defaults to `osac` from `PATH`                           |
 | `OSAC_CLI_CONFIG` | CLI configuration directory; when unset, the CLI uses its normal configuration location |
 
-Run creation and deletion together. The delete project depends on the create
-project, and each CLI operation is followed by a JSON lookup and a browser
+Run creation and deletion together. The create project owns the delete project
+as teardown, and each CLI operation is followed by a JSON lookup and a browser
 check of the Catalog page:
 
 ```bash
@@ -289,7 +288,7 @@ export OSAC_UI_BASE_URL=https://osac-ui-<namespace>.<cluster-domain>
 export OSAC_CLI_CONFIG="$HOME/.config/osac"
 
 pnpm --filter @osac/playwright exec playwright test \
-  --project=vmaas-catalog-delete
+  --project=vmaas-catalog
 ```
 
 Run the flows separately:
