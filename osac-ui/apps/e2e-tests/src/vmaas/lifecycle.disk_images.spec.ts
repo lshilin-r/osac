@@ -6,7 +6,7 @@ import {
   openDiskImageDetails,
   transitionDiskImageLifecycle,
 } from '../../../../libs/test-utils/src/disk_images.page';
-import { openAndLoginWithEnvironment } from '../../../../libs/test-utils/src/general/open_and_login';
+import { openAndLogin } from '../../../../libs/test-utils/src/general/open_and_login';
 import { openDiskImagesPage } from '../../../../libs/test-utils/src/main.page';
 
 test(`exercises lifecycle transitions for ${diskImagesTestData.name}`, async ({ page }) => {
@@ -18,7 +18,13 @@ test(`exercises lifecycle transitions for ${diskImagesTestData.name}`, async ({ 
   }
 
   // 1. Open the browser and log in.
-  await openAndLoginWithEnvironment(page, '/');
+  await openAndLogin(
+    page,
+    '/',
+    process.env.OSAC_ADMIN_USERNAME ?? '',
+    process.env.OSAC_ADMIN_PASSWORD ?? '',
+    'admin',
+  );
 
   // 2. Open Infrastructure > Disk images and the requested image's details.
   await openDiskImagesPage(page);

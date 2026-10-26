@@ -1,7 +1,7 @@
 import { test } from '@playwright/test';
 
 import { instanceTypeNameOrSkip, instanceTypeTestData } from './test_data';
-import { openAndLoginWithEnvironment } from '../../../../libs/test-utils/src/general/open_and_login';
+import { openAndLogin } from '../../../../libs/test-utils/src/general/open_and_login';
 import {
   createInstanceType,
   expectInstanceTypeNotToExist,
@@ -18,7 +18,13 @@ test('creates an instance type from Infrastructure', async ({ page }) => {
   }
 
   // 1. Open the browser and log in.
-  await openAndLoginWithEnvironment(page, '/');
+  await openAndLogin(
+    page,
+    '/',
+    process.env.OSAC_ADMIN_USERNAME ?? '',
+    process.env.OSAC_ADMIN_PASSWORD ?? '',
+    'admin',
+  );
 
   // 2. Open Infrastructure > Instance types and verify the Instance types page.
   await openInstanceTypesPage(page);

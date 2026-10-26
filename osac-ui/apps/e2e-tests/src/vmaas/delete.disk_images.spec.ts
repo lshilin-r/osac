@@ -7,7 +7,7 @@ import {
   includeObsoleteDiskImages,
   openDiskImageDetails,
 } from '../../../../libs/test-utils/src/disk_images.page';
-import { openAndLoginWithEnvironment } from '../../../../libs/test-utils/src/general/open_and_login';
+import { openAndLogin } from '../../../../libs/test-utils/src/general/open_and_login';
 import { openDiskImagesPage } from '../../../../libs/test-utils/src/main.page';
 
 test(`deletes disk image ${diskImagesTestData.name}`, async ({ page }) => {
@@ -19,7 +19,13 @@ test(`deletes disk image ${diskImagesTestData.name}`, async ({ page }) => {
   }
 
   // 1. Open the browser and log in.
-  await openAndLoginWithEnvironment(page, '/');
+  await openAndLogin(
+    page,
+    '/',
+    process.env.OSAC_ADMIN_USERNAME ?? '',
+    process.env.OSAC_ADMIN_PASSWORD ?? '',
+    'admin',
+  );
 
   // 2. Open Infrastructure > Disk images and ensure the configured image exists.
   await openDiskImagesPage(page);

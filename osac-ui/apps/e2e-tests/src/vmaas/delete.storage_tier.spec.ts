@@ -1,7 +1,7 @@
 import { test } from '@playwright/test';
 
 import { storageTierNameOrSkip, storageTierTestData } from './test_data';
-import { openAndLoginWithEnvironment } from '../../../../libs/test-utils/src/general/open_and_login';
+import { openAndLogin } from '../../../../libs/test-utils/src/general/open_and_login';
 import { openStorageTiersPage } from '../../../../libs/test-utils/src/main.page';
 import {
   deleteStorageTier,
@@ -19,7 +19,13 @@ test('deletes the requested storage tier', async ({ page }) => {
   const storageTier = { ...storageTierTestData, name: storageTierName };
 
   // 1. Open the browser and log in.
-  await openAndLoginWithEnvironment(page, '/');
+  await openAndLogin(
+    page,
+    '/',
+    process.env.OSAC_ADMIN_USERNAME ?? '',
+    process.env.OSAC_ADMIN_PASSWORD ?? '',
+    'admin',
+  );
 
   // 2. Open Storage > Storage Tiers and ensure the requested tier exists.
   await openStorageTiersPage(page);

@@ -1,7 +1,7 @@
 import { test } from '@playwright/test';
 
 import { tenantNameOrSkip } from './test_data';
-import { openAndLoginWithEnvironment } from '../../../../libs/test-utils/src/general/open_and_login';
+import { openAndLogin } from '../../../../libs/test-utils/src/general/open_and_login';
 import { openTenantsPage } from '../../../../libs/test-utils/src/main.page';
 import { deleteTenant } from '../../../../libs/test-utils/src/tenants.page';
 
@@ -14,7 +14,13 @@ test('deletes the requested tenant', async ({ page }) => {
   }
 
   // 1. Open the browser and log in.
-  await openAndLoginWithEnvironment(page, '/');
+  await openAndLogin(
+    page,
+    '/',
+    process.env.OSAC_ADMIN_USERNAME ?? '',
+    process.env.OSAC_ADMIN_PASSWORD ?? '',
+    'admin',
+  );
 
   // 2. Open the Tenants page and delete the tenant received as a parameter.
   await openTenantsPage(page);

@@ -70,6 +70,12 @@ export const openAndLogin = async (
   userType: LoginUserType,
   newPassword = '',
 ): Promise<void> => {
+  if (!username || !password) {
+    throw new Error(
+      'OSAC_ADMIN_USERNAME and OSAC_ADMIN_PASSWORD must be set to a valid Keycloak test user.',
+    );
+  }
+
   await openBrowser(page, link);
 
   if (await isLoggedIn(page)) {
@@ -116,21 +122,4 @@ export const openAndLogin = async (
   }
 
   await verifyLoggedInUser(page, username, userType);
-};
-
-/** Open the login page and authenticate with the configured test user. */
-export const openAndLoginWithEnvironment = async (page: Page, link: string): Promise<void> => {
-  const username = process.env.OSAC_USERNAME;
-  const password = process.env.OSAC_PASSWORD;
-  const newPassword = process.env.OSAC_NEW_PASSWORD ?? '';
-  const configuredUserType = process.env.OSAC_USER_TYPE ?? 'admin';
-  if (configuredUserType !== 'admin' && configuredUserType !== 'tenant_type') {
-    throw new Error('OSAC_USER_TYPE must be either admin or tenant_type.');
-  }
-
-  if (!username || !password) {
-    throw new Error('OSAC_USERNAME and OSAC_PASSWORD must be set to a valid Keycloak test user.');
-  }
-
-  await openAndLogin(page, link, username, password, configuredUserType, newPassword);
 };

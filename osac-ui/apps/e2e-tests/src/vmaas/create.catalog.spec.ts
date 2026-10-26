@@ -8,7 +8,7 @@ import { catalogTestData } from './test_data';
 import { getCatalogItems } from '../../../../libs/osac-cli/src/catalog';
 import { expectOsacCommandSucceeded, runOsacCommand } from '../../../../libs/osac-cli/src/cli';
 import { expectCatalogItemListed } from '../../../../libs/test-utils/src/catalog.page';
-import { openAndLoginWithEnvironment } from '../../../../libs/test-utils/src/general/open_and_login';
+import { openAndLogin } from '../../../../libs/test-utils/src/general/open_and_login';
 import { openCatalogPage } from '../../../../libs/test-utils/src/main.page';
 
 test('creates a catalog item with the osac CLI and lists it in Catalog', async ({ page }) => {
@@ -89,7 +89,13 @@ test('creates a catalog item with the osac CLI and lists it in Catalog', async (
   );
 
   // Open the browser, authenticate, and verify the created catalog item in the UI.
-  await openAndLoginWithEnvironment(page, '/');
+  await openAndLogin(
+    page,
+    '/',
+    process.env.OSAC_ADMIN_USERNAME ?? '',
+    process.env.OSAC_ADMIN_PASSWORD ?? '',
+    'admin',
+  );
   await openCatalogPage(page);
   await expectCatalogItemListed(
     page,

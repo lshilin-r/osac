@@ -1,7 +1,7 @@
 import { test } from '@playwright/test';
 
 import { instanceTypeNameOrSkip, instanceTypeTestData } from './test_data';
-import { openAndLoginWithEnvironment } from '../../../../libs/test-utils/src/general/open_and_login';
+import { openAndLogin } from '../../../../libs/test-utils/src/general/open_and_login';
 import { changeInstanceTypeLifecycle } from '../../../../libs/test-utils/src/instance_types.page';
 import { openInstanceTypesPage } from '../../../../libs/test-utils/src/main.page';
 
@@ -13,7 +13,13 @@ test('verifies the requested instance type lifecycle transitions', async ({ page
   }
 
   // 1. Open the browser and log in.
-  await openAndLoginWithEnvironment(page, '/');
+  await openAndLogin(
+    page,
+    '/',
+    process.env.OSAC_ADMIN_USERNAME ?? '',
+    process.env.OSAC_ADMIN_PASSWORD ?? '',
+    'admin',
+  );
 
   // 2. Open Infrastructure > Instance types.
   await openInstanceTypesPage(page);
