@@ -1,5 +1,5 @@
 import { type Locator, type Page, expect } from '@playwright/test';
-import { chmod, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, rmdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -25,9 +25,15 @@ export interface TenantCredentials {
 const safeTenantName = (tenantName: string): string =>
   tenantName.replace(/[^a-zA-Z0-9._-]/g, '_') || 'tenant';
 
+const tenantCredentialsDirectoryPath = (tenantName: string): string =>
+  join(tmpdir(), `osac-${safeTenantName(tenantName)}-break-glass`);
+
 /** Return the temporary credential-file path for a tenant. */
 export const tenantCredentialsFilePath = (tenantName: string): string =>
-  join(tmpdir(), `osac-${safeTenantName(tenantName)}-break-glass-credentials.txt`);
+  join(
+    tenantCredentialsDirectoryPath(tenantName),
+    `${safeTenantName(tenantName)}-break-glass-credentials.txt`,
+  );
 
 const credentialFromFile = (contents: string, label: string, credentialsFile: string): string => {
   const line = contents.split(/\r?\n/).find((entry) => entry.startsWith(`${label}:`));
@@ -52,6 +58,14 @@ export const readTenantCredentials = async (
 /** Remove the saved credentials for a tenant, if present. */
 export const removeTenantCredentials = async (tenantName: string): Promise<void> => {
   await rm(tenantCredentialsFilePath(tenantName), { force: true });
+  try {
+    await rmdir(tenantCredentialsDirectoryPath(tenantName));
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code !== 'ENOENT' && code !== 'ENOTEMPTY') {
+      throw error;
+    }
+  }
 };
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -145,17 +159,22 @@ export const createTenant = async (
 
   // Save the generated credentials in a tenant-specific temporary file.
   const credentialsFile = tenantCredentialsFilePath(tenantName);
-  await writeFile(
-    credentialsFile,
-    [
-      `Tenant: ${tenantName}`,
-      `Username: ${await username.inputValue()}`,
-      `Password: ${await password.inputValue()}`,
-      '',
-    ].join('\n'),
-    { encoding: 'utf8', mode: 0o600 },
-  );
-  await chmod(credentialsFile, 0o600);
+  await mkdir(tenantCredentialsDirectoryPath(tenantName), { mode: 0o700 });
+  try {
+    await writeFile(
+      credentialsFile,
+      [
+        `Tenant: ${tenantName}`,
+        `Username: ${await username.inputValue()}`,
+        `Password: ${await password.inputValue()}`,
+        '',
+      ].join('\n'),
+      { encoding: 'utf8', flag: 'wx', mode: 0o600 },
+    );
+  } catch (error) {
+    await rmdir(tenantCredentialsDirectoryPath(tenantName)).catch(() => undefined);
+    throw error;
+  }
 
   // Close the credentials dialog and return to the Tenants main page.
   await page.getByRole(...TenantsCredentialsPage.savedCredentials).click();

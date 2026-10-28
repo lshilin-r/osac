@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { stringify } from 'yaml';
 
-import { catalogTestData } from './test_data';
+import { catalogOwnershipFilePath, catalogTestData } from './test_data';
 import { getCatalogItems } from '../../../../libs/osac-cli/src/catalog';
 import { expectOsacCommandSucceeded, runOsacCommand } from '../../../../libs/osac-cli/src/cli';
 import { expectCatalogItemListed } from '../../../../libs/test-utils/src/catalog.page';
@@ -74,6 +74,11 @@ test('creates a catalog item with the osac CLI and lists it in Catalog', async (
     try {
       const createResult = await runOsacCommand(['create', '-f', manifestPath]);
       expectOsacCommandSucceeded(createResult, `Create catalog item '${catalogTestData.name}'`);
+      await writeFile(catalogOwnershipFilePath(catalogTestData.name), '', {
+        encoding: 'utf8',
+        flag: 'wx',
+        mode: 0o600,
+      });
     } finally {
       await rm(manifestDirectory, { force: true, recursive: true });
     }

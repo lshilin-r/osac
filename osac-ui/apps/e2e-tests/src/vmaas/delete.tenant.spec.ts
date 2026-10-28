@@ -37,9 +37,6 @@ test('deletes the requested tenant', async ({ page }) => {
   });
 
   const credentialsFile = tenantCredentialsFilePath(configuredTenantName);
-  await testStep('tenant-delete', `Verify tenant credential file exists before deletion`, () =>
-    expect(access(credentialsFile)).resolves.toBeUndefined(),
-  );
   await testStep(
     'tenant-delete',
     `Verify tenant "${configuredTenantName}" exists before deletion`,

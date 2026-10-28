@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
+import { access, rm } from 'node:fs/promises';
 
-import { catalogTestData } from './test_data';
+import { catalogOwnershipFilePath, catalogTestData } from './test_data';
 import { catalogItemResource, getCatalogItems } from '../../../../libs/osac-cli/src/catalog';
 import { expectOsacCommandSucceeded, runOsacCommand } from '../../../../libs/osac-cli/src/cli';
 import { expectCatalogItemNotListed } from '../../../../libs/test-utils/src/catalog.page';
@@ -11,6 +12,30 @@ import { openCatalogPage } from '../../../../libs/test-utils/src/main.page';
 test('deletes a catalog item with the osac CLI and removes it from Catalog', async ({ page }) => {
   test.setTimeout(180_000);
   logProgress('catalog-delete', `Starting flow for "${catalogTestData.name}".`);
+
+  const ownershipFile = catalogOwnershipFilePath(catalogTestData.name);
+  const createdByThisRun = await testStep(
+    'catalog-delete',
+    `Verify catalog item "${catalogTestData.name}" belongs to this run`,
+    async () => {
+      try {
+        await access(ownershipFile);
+        return true;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+          return false;
+        }
+        throw error;
+      }
+    },
+  );
+  if (!createdByThisRun) {
+    test.skip(
+      true,
+      `Catalog item "${catalogTestData.name}" was not created by this run; leaving it untouched.`,
+    );
+    return;
+  }
 
   // Confirm that the catalog item created by the preceding flow is present.
   const existingItems = await testStep(
@@ -60,5 +85,9 @@ test('deletes a catalog item with the osac CLI and removes it from Catalog', asy
       await openCatalogPage(page);
       await expectCatalogItemNotListed(page, catalogTestData.name);
     },
+  );
+
+  await testStep('catalog-delete', 'Remove catalog ownership marker', () =>
+    rm(ownershipFile, { force: true }),
   );
 });

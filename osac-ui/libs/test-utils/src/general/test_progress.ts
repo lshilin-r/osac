@@ -2,8 +2,10 @@ import { test } from '@playwright/test';
 
 /** Write a prefixed, non-sensitive progress message for the test report. */
 export const logProgress = (flow: string, message: string): void => {
-  // eslint-disable-next-line no-console
-  console.log(`[${flow}] ${message}`);
+  test.info().annotations.push({
+    type: 'progress',
+    description: `[${flow}] ${message}`,
+  });
 };
 
 /** Add a named Playwright report step with matching start/completion logs. */
