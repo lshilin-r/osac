@@ -2,6 +2,7 @@ import { test } from '@playwright/test';
 
 import { storageTierNameOrSkip, storageTierTestData } from './test_data';
 import { openAndLogin } from '../../../../libs/test-utils/src/general/open_and_login';
+import { logProgress, testStep } from '../../../../libs/test-utils/src/general/test_progress';
 import { openStorageTiersPage } from '../../../../libs/test-utils/src/main.page';
 import {
   deleteStorageTier,
@@ -14,23 +15,28 @@ test('deletes the requested storage tier', async ({ page }) => {
 
   const storageTierName = storageTierNameOrSkip();
   if (!storageTierName) {
+    logProgress('storage-tier-delete', 'Skipped: storage_tier.name is not configured.');
     return;
   }
+  logProgress('storage-tier-delete', `Starting flow for "${storageTierName}".`);
   const storageTier = { ...storageTierTestData, name: storageTierName };
 
-  // 1. Open the browser and log in.
-  await openAndLogin(
-    page,
-    '/',
-    process.env.OSAC_ADMIN_USERNAME ?? '',
-    process.env.OSAC_ADMIN_PASSWORD ?? '',
-    'admin',
+  await testStep('storage-tier-delete', 'Log in as the admin test user', () =>
+    openAndLogin(
+      page,
+      '/',
+      process.env.OSAC_ADMIN_USERNAME ?? '',
+      process.env.OSAC_ADMIN_PASSWORD ?? '',
+      'admin',
+    ),
   );
 
-  // 2. Open Storage > Storage Tiers and ensure the requested tier exists.
-  await openStorageTiersPage(page);
-  await ensureStorageTierExists(page, storageTier);
+  await testStep('storage-tier-delete', 'Open Storage > Storage Tiers', async () => {
+    await openStorageTiersPage(page);
+    await ensureStorageTierExists(page, storageTier);
+  });
 
-  // 3. Delete the requested tier.
-  await deleteStorageTier(page, storageTierName);
+  await testStep('storage-tier-delete', 'Delete the requested storage tier', () =>
+    deleteStorageTier(page, storageTierName),
+  );
 });

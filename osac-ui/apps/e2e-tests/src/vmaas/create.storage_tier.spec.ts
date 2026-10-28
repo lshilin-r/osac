@@ -2,6 +2,7 @@ import { test } from '@playwright/test';
 
 import { storageTierNameOrSkip, storageTierTestData } from './test_data';
 import { openAndLogin } from '../../../../libs/test-utils/src/general/open_and_login';
+import { logProgress, testStep } from '../../../../libs/test-utils/src/general/test_progress';
 import {
   createStorageTier,
   expectStorageBackendReady,
@@ -17,34 +18,42 @@ test('creates a storage tier from Storage > Storage Tiers', async ({ page }) => 
   test.setTimeout(120_000);
   const storageTierName = storageTierNameOrSkip();
   if (!storageTierName) {
+    logProgress('storage-tier-create', 'Skipped: storage_tier.name is not configured.');
     return;
   }
+  logProgress('storage-tier-create', `Starting flow for "${storageTierName}".`);
   const storageTier = { ...storageTierTestData, name: storageTierName };
 
-  // 1. Open the browser and log in.
-  await openAndLogin(
-    page,
-    '/',
-    process.env.OSAC_ADMIN_USERNAME ?? '',
-    process.env.OSAC_ADMIN_PASSWORD ?? '',
-    'admin',
+  await testStep('storage-tier-create', 'Log in as the admin test user', () =>
+    openAndLogin(
+      page,
+      '/',
+      process.env.OSAC_ADMIN_USERNAME ?? '',
+      process.env.OSAC_ADMIN_PASSWORD ?? '',
+      'admin',
+    ),
   );
 
-  // 2. Verify the configured backend is Ready and provided by LVMS.
-  await expectStorageBackendReady(page, storageTierTestData.backend, 'lvms');
+  await testStep('storage-tier-create', 'Verify the LVMS backend is ready', () =>
+    expectStorageBackendReady(page, storageTierTestData.backend, 'lvms'),
+  );
 
-  // 3. Verify the run-specific tier name is available before creating it.
-  await expectStorageTierNotListed(page, storageTier.name);
+  await testStep('storage-tier-create', 'Verify storage tier name is available', () =>
+    expectStorageTierNotListed(page, storageTier.name),
+  );
 
-  // 4. Open the create form and verify the configured backend is selectable.
-  await openCreateStorageTierPage(page);
-  await expectStorageBackendSelectable(page, storageTierTestData.backend);
+  await testStep('storage-tier-create', 'Open the storage tier creation form', async () => {
+    await openCreateStorageTierPage(page);
+    await expectStorageBackendSelectable(page, storageTierTestData.backend);
+  });
 
-  // 5. Create a tier using the configured values and existing backend.
-  await createStorageTier(page, storageTier);
+  await testStep('storage-tier-create', 'Create the configured storage tier', () =>
+    createStorageTier(page, storageTier),
+  );
 
-  // 6. Return to the tier list and verify the new tier appears.
-  await openStorageTierListPage(page);
-  await expectStorageTierListed(page, storageTier.name);
-  await expectStorageTierConfiguration(page, storageTier);
+  await testStep('storage-tier-create', 'Verify the storage tier configuration', async () => {
+    await openStorageTierListPage(page);
+    await expectStorageTierListed(page, storageTier.name);
+    await expectStorageTierConfiguration(page, storageTier);
+  });
 });

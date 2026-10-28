@@ -2,6 +2,7 @@ import { test } from '@playwright/test';
 
 import { instanceTypeNameOrSkip, instanceTypeTestData } from './test_data';
 import { openAndLogin } from '../../../../libs/test-utils/src/general/open_and_login';
+import { logProgress, testStep } from '../../../../libs/test-utils/src/general/test_progress';
 import {
   deleteInstanceType,
   ensureInstanceTypeExists,
@@ -12,27 +13,31 @@ test('deletes the requested instance type', async ({ page }) => {
   test.setTimeout(120_000);
   const instanceTypeName = instanceTypeNameOrSkip();
   if (!instanceTypeName) {
+    logProgress('instance-type-delete', 'Skipped: instance_type.name is not configured.');
     return;
   }
+  logProgress('instance-type-delete', `Starting flow for "${instanceTypeName}".`);
 
-  // 1. Open the browser and log in.
-  await openAndLogin(
-    page,
-    '/',
-    process.env.OSAC_ADMIN_USERNAME ?? '',
-    process.env.OSAC_ADMIN_PASSWORD ?? '',
-    'admin',
+  await testStep('instance-type-delete', 'Log in as the admin test user', () =>
+    openAndLogin(
+      page,
+      '/',
+      process.env.OSAC_ADMIN_USERNAME ?? '',
+      process.env.OSAC_ADMIN_PASSWORD ?? '',
+      'admin',
+    ),
   );
 
-  // 2. Open Infrastructure > Instance types and delete the requested instance type.
-  await openInstanceTypesPage(page);
-  await ensureInstanceTypeExists(
-    page,
-    instanceTypeName,
-    instanceTypeTestData.description,
-    instanceTypeTestData.vcpus,
-    instanceTypeTestData.memoryGib,
-    instanceTypeTestData.gpu,
-  );
-  await deleteInstanceType(page, instanceTypeName);
+  await testStep('instance-type-delete', 'Delete the requested instance type', async () => {
+    await openInstanceTypesPage(page);
+    await ensureInstanceTypeExists(
+      page,
+      instanceTypeName,
+      instanceTypeTestData.description,
+      instanceTypeTestData.vcpus,
+      instanceTypeTestData.memoryGib,
+      instanceTypeTestData.gpu,
+    );
+    await deleteInstanceType(page, instanceTypeName);
+  });
 });

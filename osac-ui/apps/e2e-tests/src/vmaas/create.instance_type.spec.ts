@@ -2,6 +2,7 @@ import { test } from '@playwright/test';
 
 import { instanceTypeNameOrSkip, instanceTypeTestData } from './test_data';
 import { openAndLogin } from '../../../../libs/test-utils/src/general/open_and_login';
+import { logProgress, testStep } from '../../../../libs/test-utils/src/general/test_progress';
 import {
   createInstanceType,
   expectInstanceTypeNotToExist,
@@ -14,34 +15,41 @@ test('creates an instance type from Infrastructure', async ({ page }) => {
   test.setTimeout(120_000);
   const instanceTypeName = instanceTypeNameOrSkip();
   if (!instanceTypeName) {
+    logProgress('instance-type-create', 'Skipped: instance_type.name is not configured.');
     return;
   }
+  logProgress('instance-type-create', `Starting flow for "${instanceTypeName}".`);
 
-  // 1. Open the browser and log in.
-  await openAndLogin(
-    page,
-    '/',
-    process.env.OSAC_ADMIN_USERNAME ?? '',
-    process.env.OSAC_ADMIN_PASSWORD ?? '',
-    'admin',
+  await testStep('instance-type-create', 'Log in as the admin test user', () =>
+    openAndLogin(
+      page,
+      '/',
+      process.env.OSAC_ADMIN_USERNAME ?? '',
+      process.env.OSAC_ADMIN_PASSWORD ?? '',
+      'admin',
+    ),
   );
 
-  // 2. Open Infrastructure > Instance types and verify the Instance types page.
-  await openInstanceTypesPage(page);
+  await testStep('instance-type-create', 'Open Infrastructure > Instance types', () =>
+    openInstanceTypesPage(page),
+  );
 
-  // 3. Fail clearly if a previous run already created the requested instance type.
-  await expectInstanceTypeNotToExist(page, instanceTypeName);
+  await testStep('instance-type-create', 'Verify instance type name is available', () =>
+    expectInstanceTypeNotToExist(page, instanceTypeName),
+  );
 
-  // 4. Open the create page and verify its title.
-  await openCreateInstanceTypePage(page);
+  await testStep('instance-type-create', 'Open the instance type creation form', () =>
+    openCreateInstanceTypePage(page),
+  );
 
-  // 5. Fill and submit the instance type defined in extravars.yaml.
-  await createInstanceType(
-    page,
-    instanceTypeName,
-    instanceTypeTestData.description,
-    instanceTypeTestData.vcpus,
-    instanceTypeTestData.memoryGib,
-    instanceTypeTestData.gpu,
+  await testStep('instance-type-create', 'Create the configured instance type', () =>
+    createInstanceType(
+      page,
+      instanceTypeName,
+      instanceTypeTestData.description,
+      instanceTypeTestData.vcpus,
+      instanceTypeTestData.memoryGib,
+      instanceTypeTestData.gpu,
+    ),
   );
 });

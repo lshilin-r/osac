@@ -3,6 +3,7 @@ import { access } from 'node:fs/promises';
 
 import { tenantNameOrSkip } from './test_data';
 import { openAndLogin } from '../../../../libs/test-utils/src/general/open_and_login';
+import { logProgress, testStep } from '../../../../libs/test-utils/src/general/test_progress';
 import { openTenantsPage } from '../../../../libs/test-utils/src/main.page';
 import {
   deleteTenant,
@@ -14,22 +15,29 @@ test('deletes the requested tenant', async ({ page }) => {
   test.setTimeout(180_000);
   const configuredTenantName = tenantNameOrSkip();
   if (!configuredTenantName) {
+    logProgress('tenant-delete', 'Skipped: tenant_name is not configured.');
     return;
   }
+  logProgress('tenant-delete', `Starting flow for "${configuredTenantName}".`);
 
-  // 1. Open the browser and log in.
-  await openAndLogin(
-    page,
-    '/',
-    process.env.OSAC_ADMIN_USERNAME ?? '',
-    process.env.OSAC_ADMIN_PASSWORD ?? '',
-    'admin',
-  );
+  await testStep('tenant-delete', 'Log in as the admin test user', async () => {
+    await openAndLogin(
+      page,
+      '/',
+      process.env.OSAC_ADMIN_USERNAME ?? '',
+      process.env.OSAC_ADMIN_PASSWORD ?? '',
+      'admin',
+    );
+  });
 
-  // 2. Open the Tenants page and delete the tenant received as a parameter.
-  await openTenantsPage(page);
-  const credentialsFile = tenantCredentialsFilePath(configuredTenantName);
-  await expect(access(credentialsFile)).resolves.toBeUndefined();
-  await deleteTenant(page, configuredTenantName);
-  await expect(access(credentialsFile)).rejects.toThrow();
+  await testStep('tenant-delete', 'Open Administration > Tenants', async () => {
+    await openTenantsPage(page);
+  });
+
+  await testStep('tenant-delete', `Delete tenant "${configuredTenantName}"`, async () => {
+    const credentialsFile = tenantCredentialsFilePath(configuredTenantName);
+    await expect(access(credentialsFile)).resolves.toBeUndefined();
+    await deleteTenant(page, configuredTenantName);
+    await expect(access(credentialsFile)).rejects.toThrow();
+  });
 });
