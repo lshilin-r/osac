@@ -74,7 +74,10 @@ Before running, set it to a tenant that does not already exist. The tenant
 create flow requires that the configured tenant does not already exist; the
 delete flow requires that it exists. All VMaaS specs skip before browser
 actions when `tenant_name` is unset or empty. These flows always authenticate
-with the admin test user.
+with the admin test user. The create flow saves the generated tenant
+break-glass credentials in `/tmp` using a filename containing the tenant name,
+logs in with those credentials as the tenant, and the delete flow removes the
+file after the tenant is deleted.
 
 Set the deployment and admin login variables from the [Running](#running) section,
 then run the flows:

@@ -1,5 +1,5 @@
 import { type Locator, type Page, expect } from '@playwright/test';
-import { mkdtemp, writeFile } from 'node:fs/promises';
+import { chmod, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -16,6 +16,43 @@ import {
 } from '../../locators/tenants';
 
 const defaultTenantNames = ['shared', 'system'] as const;
+
+export interface TenantCredentials {
+  username: string;
+  password: string;
+}
+
+const safeTenantName = (tenantName: string): string =>
+  tenantName.replace(/[^a-zA-Z0-9._-]/g, '_') || 'tenant';
+
+/** Return the temporary credential-file path for a tenant. */
+export const tenantCredentialsFilePath = (tenantName: string): string =>
+  join(tmpdir(), `osac-${safeTenantName(tenantName)}-break-glass-credentials.txt`);
+
+const credentialFromFile = (contents: string, label: string, credentialsFile: string): string => {
+  const line = contents.split(/\r?\n/).find((entry) => entry.startsWith(`${label}:`));
+  const value = line?.slice(label.length + 1).trim();
+  if (!value) {
+    throw new Error(`Tenant credentials file "${credentialsFile}" is missing ${label}.`);
+  }
+  return value;
+};
+
+/** Read tenant credentials previously saved by createTenant. */
+export const readTenantCredentials = async (
+  credentialsFile: string,
+): Promise<TenantCredentials> => {
+  const contents = await readFile(credentialsFile, 'utf8');
+  return {
+    username: credentialFromFile(contents, 'Username', credentialsFile),
+    password: credentialFromFile(contents, 'Password', credentialsFile),
+  };
+};
+
+/** Remove the saved credentials for a tenant, if present. */
+export const removeTenantCredentials = async (tenantName: string): Promise<void> => {
+  await rm(tenantCredentialsFilePath(tenantName), { force: true });
+};
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -107,9 +144,7 @@ export const createTenant = async (
   await expect(password).toHaveValue(/.+/);
 
   // Save the generated credentials in a tenant-specific temporary file.
-  const safeTenantName = tenantName.replace(/[^a-zA-Z0-9._-]/g, '_') || 'tenant';
-  const temporaryDirectory = await mkdtemp(join(tmpdir(), `osac-${safeTenantName}-`));
-  const credentialsFile = join(temporaryDirectory, `${safeTenantName}-break-glass-credentials.txt`);
+  const credentialsFile = tenantCredentialsFilePath(tenantName);
   await writeFile(
     credentialsFile,
     [
@@ -120,6 +155,7 @@ export const createTenant = async (
     ].join('\n'),
     { encoding: 'utf8', mode: 0o600 },
   );
+  await chmod(credentialsFile, 0o600);
 
   // Close the credentials dialog and return to the Tenants main page.
   await page.getByRole(...TenantsCredentialsPage.savedCredentials).click();
@@ -191,4 +227,6 @@ export const deleteTenant = async (page: Page, tenantName: string): Promise<void
     120_000,
     tenantRow.locator(...TenantsMainPage.tenantStatusCell),
   );
+
+  await removeTenantCredentials(tenantName);
 };

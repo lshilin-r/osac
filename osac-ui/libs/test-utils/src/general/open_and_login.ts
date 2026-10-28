@@ -59,6 +59,23 @@ export const openBrowser = async (page: Page, link: string): Promise<void> => {
   await expect(page.getByRole(...LoginPage.pageTitle)).toBeVisible();
 };
 
+/** Log out the current browser session and clear its local session state. */
+export const logout = async (page: Page): Promise<void> => {
+  const response = await page.evaluate(async () => {
+    const result = await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+    return { ok: result.ok, status: result.status };
+  });
+  if (!response.ok) {
+    throw new Error(`Logout failed (HTTP ${response.status}).`);
+  }
+
+  await page.context().clearCookies();
+  await page.evaluate(() => {
+    localStorage.removeItem('osac.sessionExpiry');
+    sessionStorage.clear();
+  });
+};
+
 /**
  * Open the login page and authenticate with the supplied credentials.
  */

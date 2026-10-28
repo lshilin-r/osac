@@ -1,13 +1,14 @@
 import { test } from '@playwright/test';
 
 import { tenantNameOrSkip } from './test_data';
-import { openAndLogin } from '../../../../libs/test-utils/src/general/open_and_login';
+import { logout, openAndLogin } from '../../../../libs/test-utils/src/general/open_and_login';
 import { openTenantsPage } from '../../../../libs/test-utils/src/main.page';
 import {
   createTenant,
   expectDefaultTenants,
   expectTenantNotToExist,
   openCreateTenantPage,
+  readTenantCredentials,
 } from '../../../../libs/test-utils/src/tenants.page';
 
 test('creates a tenant from the Administration tenants page', async ({ page }) => {
@@ -39,5 +40,15 @@ test('creates a tenant from the Administration tenants page', async ({ page }) =
   // 5. Open the tenant creation page and create the requested tenant.
   await openCreateTenantPage(page);
   const credentialsFile = await createTenant(page, configuredTenantName);
-  process.env.OSAC_TENANT_CREDENTIALS_FILE = credentialsFile;
+  const tenantCredentials = await readTenantCredentials(credentialsFile);
+
+  // 6. Log out the admin and verify that the generated tenant credentials work.
+  await logout(page);
+  await openAndLogin(
+    page,
+    '/',
+    tenantCredentials.username,
+    tenantCredentials.password,
+    'tenant_type',
+  );
 });
