@@ -36,11 +36,21 @@ test(`exercises lifecycle transitions for ${diskImagesTestData.name}`, async ({ 
   });
 
   const [deprecate, obsolete, reactivate] = diskImagesTestData.lifecycleActions;
-  await testStep('disk-image-lifecycle', 'Exercise disk image lifecycle transitions', async () => {
-    await expectDiskImageLifecycle(page, 'Available');
-    await transitionDiskImageLifecycle(page, obsolete, 'Obsolete');
-    await transitionDiskImageLifecycle(page, reactivate, 'Available');
-    await transitionDiskImageLifecycle(page, deprecate, 'Deprecated');
-    await transitionDiskImageLifecycle(page, reactivate, 'Available');
-  });
+  await testStep(
+    'disk-image-lifecycle',
+    `Verify disk image "${diskImageName}" is Available before lifecycle transitions`,
+    () => expectDiskImageLifecycle(page, 'Available'),
+  );
+  await testStep('disk-image-lifecycle', 'Transition disk image to Obsolete', () =>
+    transitionDiskImageLifecycle(page, obsolete, 'Obsolete'),
+  );
+  await testStep('disk-image-lifecycle', 'Reactivate disk image to Available', () =>
+    transitionDiskImageLifecycle(page, reactivate, 'Available'),
+  );
+  await testStep('disk-image-lifecycle', 'Deprecate disk image', () =>
+    transitionDiskImageLifecycle(page, deprecate, 'Deprecated'),
+  );
+  await testStep('disk-image-lifecycle', 'Reactivate disk image to Available', () =>
+    transitionDiskImageLifecycle(page, reactivate, 'Available'),
+  );
 });

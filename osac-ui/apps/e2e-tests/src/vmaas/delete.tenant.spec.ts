@@ -7,6 +7,8 @@ import { logProgress, testStep } from '../../../../libs/test-utils/src/general/t
 import { openTenantsPage } from '../../../../libs/test-utils/src/main.page';
 import {
   deleteTenant,
+  expectTenantNotToExist,
+  expectTenantToExist,
   tenantCredentialsFilePath,
 } from '../../../../libs/test-utils/src/tenants.page';
 
@@ -34,10 +36,24 @@ test('deletes the requested tenant', async ({ page }) => {
     await openTenantsPage(page);
   });
 
-  await testStep('tenant-delete', `Delete tenant "${configuredTenantName}"`, async () => {
-    const credentialsFile = tenantCredentialsFilePath(configuredTenantName);
-    await expect(access(credentialsFile)).resolves.toBeUndefined();
-    await deleteTenant(page, configuredTenantName);
-    await expect(access(credentialsFile)).rejects.toThrow();
-  });
+  const credentialsFile = tenantCredentialsFilePath(configuredTenantName);
+  await testStep('tenant-delete', `Verify tenant credential file exists before deletion`, () =>
+    expect(access(credentialsFile)).resolves.toBeUndefined(),
+  );
+  await testStep(
+    'tenant-delete',
+    `Verify tenant "${configuredTenantName}" exists before deletion`,
+    () => expectTenantToExist(page, configuredTenantName),
+  );
+  await testStep('tenant-delete', `Delete tenant "${configuredTenantName}"`, () =>
+    deleteTenant(page, configuredTenantName),
+  );
+  await testStep(
+    'tenant-delete',
+    `Verify tenant "${configuredTenantName}" does not exist after deletion`,
+    () => expectTenantNotToExist(page, configuredTenantName),
+  );
+  await testStep('tenant-delete', `Verify tenant credential file is removed after deletion`, () =>
+    expect(access(credentialsFile)).rejects.toThrow(),
+  );
 });

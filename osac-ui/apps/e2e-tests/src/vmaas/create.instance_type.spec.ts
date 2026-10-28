@@ -6,6 +6,7 @@ import { logProgress, testStep } from '../../../../libs/test-utils/src/general/t
 import {
   createInstanceType,
   expectInstanceTypeNotToExist,
+  expectInstanceTypeToExist,
   openCreateInstanceTypePage,
 } from '../../../../libs/test-utils/src/instance_types.page';
 import { openInstanceTypesPage } from '../../../../libs/test-utils/src/main.page';
@@ -34,15 +35,17 @@ test('creates an instance type from Infrastructure', async ({ page }) => {
     openInstanceTypesPage(page),
   );
 
-  await testStep('instance-type-create', 'Verify instance type name is available', () =>
-    expectInstanceTypeNotToExist(page, instanceTypeName),
+  await testStep(
+    'instance-type-create',
+    `Verify instance type "${instanceTypeName}" does not exist before creation`,
+    () => expectInstanceTypeNotToExist(page, instanceTypeName),
   );
 
   await testStep('instance-type-create', 'Open the instance type creation form', () =>
     openCreateInstanceTypePage(page),
   );
 
-  await testStep('instance-type-create', 'Create the configured instance type', () =>
+  await testStep('instance-type-create', `Create instance type "${instanceTypeName}"`, () =>
     createInstanceType(
       page,
       instanceTypeName,
@@ -51,5 +54,11 @@ test('creates an instance type from Infrastructure', async ({ page }) => {
       instanceTypeTestData.memoryGib,
       instanceTypeTestData.gpu,
     ),
+  );
+
+  await testStep(
+    'instance-type-create',
+    `Verify instance type "${instanceTypeName}" exists after creation`,
+    () => expectInstanceTypeToExist(page, instanceTypeName),
   );
 });

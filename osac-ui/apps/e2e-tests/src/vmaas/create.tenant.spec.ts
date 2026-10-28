@@ -8,6 +8,8 @@ import {
   createTenant,
   expectDefaultTenants,
   expectTenantNotToExist,
+  expectTenantToBeSynced,
+  expectTenantToExist,
   openCreateTenantPage,
   readTenantCredentials,
 } from '../../../../libs/test-utils/src/tenants.page';
@@ -42,7 +44,7 @@ test('creates a tenant from the Administration tenants page', async ({ page }) =
 
   await testStep(
     'tenant-create',
-    `Verify tenant "${configuredTenantName}" does not exist`,
+    `Verify tenant "${configuredTenantName}" does not exist before creation`,
     async () => {
       await expectTenantNotToExist(page, configuredTenantName);
     },
@@ -55,6 +57,16 @@ test('creates a tenant from the Administration tenants page', async ({ page }) =
       await openCreateTenantPage(page);
       return createTenant(page, configuredTenantName);
     },
+  );
+  await testStep(
+    'tenant-create',
+    `Verify tenant "${configuredTenantName}" exists after creation`,
+    () => expectTenantToExist(page, configuredTenantName),
+  );
+  await testStep(
+    'tenant-create',
+    `Verify tenant "${configuredTenantName}" is Synced after creation`,
+    () => expectTenantToBeSynced(page, configuredTenantName),
   );
   const tenantCredentials = await testStep(
     'tenant-create',

@@ -7,6 +7,7 @@ import { openStorageTiersPage } from '../../../../libs/test-utils/src/main.page'
 import {
   deleteStorageTier,
   ensureStorageTierExists,
+  expectStorageTierNotListed,
 } from '../../../../libs/test-utils/src/storage.page';
 
 test('deletes the requested storage tier', async ({ page }) => {
@@ -33,10 +34,23 @@ test('deletes the requested storage tier', async ({ page }) => {
 
   await testStep('storage-tier-delete', 'Open Storage > Storage Tiers', async () => {
     await openStorageTiersPage(page);
-    await ensureStorageTierExists(page, storageTier);
   });
 
-  await testStep('storage-tier-delete', 'Delete the requested storage tier', () =>
+  await testStep(
+    'storage-tier-delete',
+    `Verify storage tier "${storageTierName}" exists before deletion`,
+    async () => {
+      await ensureStorageTierExists(page, storageTier);
+    },
+  );
+
+  await testStep('storage-tier-delete', `Delete storage tier "${storageTierName}"`, () =>
     deleteStorageTier(page, storageTierName),
+  );
+
+  await testStep(
+    'storage-tier-delete',
+    `Verify storage tier "${storageTierName}" does not exist after deletion`,
+    () => expectStorageTierNotListed(page, storageTierName),
   );
 });

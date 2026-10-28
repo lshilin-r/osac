@@ -3,7 +3,10 @@ import { test } from '@playwright/test';
 import { instanceTypeNameOrSkip, instanceTypeTestData } from './test_data';
 import { openAndLogin } from '../../../../libs/test-utils/src/general/open_and_login';
 import { logProgress, testStep } from '../../../../libs/test-utils/src/general/test_progress';
-import { changeInstanceTypeLifecycle } from '../../../../libs/test-utils/src/instance_types.page';
+import {
+  changeInstanceTypeLifecycle,
+  expectInstanceTypeToExist,
+} from '../../../../libs/test-utils/src/instance_types.page';
 import { openInstanceTypesPage } from '../../../../libs/test-utils/src/main.page';
 
 test('verifies the requested instance type lifecycle transitions', async ({ page }) => {
@@ -29,17 +32,29 @@ test('verifies the requested instance type lifecycle transitions', async ({ page
     openInstanceTypesPage(page),
   );
 
-  const [deprecate, obsolete, reactivate] = instanceTypeTestData.lifecycleActions;
   await testStep(
     'instance-type-lifecycle',
-    'Exercise instance type lifecycle transitions',
-    async () => {
-      await changeInstanceTypeLifecycle(page, instanceTypeName, deprecate);
-      await changeInstanceTypeLifecycle(page, instanceTypeName, reactivate);
-      await changeInstanceTypeLifecycle(page, instanceTypeName, deprecate);
-      await changeInstanceTypeLifecycle(page, instanceTypeName, obsolete);
-      await changeInstanceTypeLifecycle(page, instanceTypeName, deprecate);
-      await changeInstanceTypeLifecycle(page, instanceTypeName, reactivate);
-    },
+    `Verify instance type "${instanceTypeName}" exists before lifecycle transitions`,
+    () => expectInstanceTypeToExist(page, instanceTypeName),
+  );
+
+  const [deprecate, obsolete, reactivate] = instanceTypeTestData.lifecycleActions;
+  await testStep('instance-type-lifecycle', 'Deprecate instance type', () =>
+    changeInstanceTypeLifecycle(page, instanceTypeName, deprecate),
+  );
+  await testStep('instance-type-lifecycle', 'Reactivate instance type to Active', () =>
+    changeInstanceTypeLifecycle(page, instanceTypeName, reactivate),
+  );
+  await testStep('instance-type-lifecycle', 'Deprecate instance type again', () =>
+    changeInstanceTypeLifecycle(page, instanceTypeName, deprecate),
+  );
+  await testStep('instance-type-lifecycle', 'Make instance type Obsolete', () =>
+    changeInstanceTypeLifecycle(page, instanceTypeName, obsolete),
+  );
+  await testStep('instance-type-lifecycle', 'Deprecate obsolete instance type', () =>
+    changeInstanceTypeLifecycle(page, instanceTypeName, deprecate),
+  );
+  await testStep('instance-type-lifecycle', 'Reactivate instance type to Active', () =>
+    changeInstanceTypeLifecycle(page, instanceTypeName, reactivate),
   );
 });

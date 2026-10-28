@@ -37,8 +37,10 @@ test(`creates disk image ${diskImagesTestData.name} from Infrastructure`, async 
     openDiskImagesPage(page),
   );
 
-  await testStep('disk-image-create', 'Verify disk image name is available', () =>
-    expectDiskImageNotToExist(page, diskImage.name),
+  await testStep(
+    'disk-image-create',
+    `Verify disk image "${diskImage.name}" does not exist before creation`,
+    () => expectDiskImageNotToExist(page, diskImage.name),
   );
 
   await testStep('disk-image-create', 'Open the disk image creation form', () =>
@@ -49,7 +51,9 @@ test(`creates disk image ${diskImagesTestData.name} from Infrastructure`, async 
     createDiskImage(page, diskImage),
   );
 
-  await testStep('disk-image-create', 'Verify the disk image is listed', () =>
-    expectDiskImageListed(page, diskImage.name),
+  await testStep(
+    'disk-image-create',
+    `Verify disk image "${diskImage.name}" exists after creation`,
+    () => expectDiskImageListed(page, diskImage.name),
   );
 });

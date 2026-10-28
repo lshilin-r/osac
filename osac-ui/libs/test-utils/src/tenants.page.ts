@@ -161,18 +161,22 @@ export const createTenant = async (
   await page.getByRole(...TenantsCredentialsPage.savedCredentials).click();
   await expect(page.getByRole(...TenantsMainPage.pageTitle)).toBeVisible();
 
-  // Locate the newly created tenant row by its exact tenant name.
-  const tenantRow = await expectTenantToExist(page, tenantName);
+  return credentialsFile;
+};
 
-  // Verify that the new tenant is synced and, when supplied, has the expected domain.
+/** Verify that a tenant is synchronized and, when supplied, has the expected domain. */
+export const expectTenantToBeSynced = async (
+  page: Page,
+  tenantName: string,
+  domainName = '',
+): Promise<void> => {
+  const tenantRow = await expectTenantToExist(page, tenantName);
   await expect(tenantRow.locator(...TenantsMainPage.tenantStatusCell)).toHaveText('Synced');
   if (domainName) {
     await expect(tenantRow.locator(...TenantsMainPage.tenantPrimaryDomainCell)).toHaveText(
       exactText(domainName),
     );
   }
-
-  return credentialsFile;
 };
 
 /** Verify that the default shared and system tenants are synced. */

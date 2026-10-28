@@ -38,8 +38,10 @@ test('creates a storage tier from Storage > Storage Tiers', async ({ page }) => 
     expectStorageBackendReady(page, storageTierTestData.backend, 'lvms'),
   );
 
-  await testStep('storage-tier-create', 'Verify storage tier name is available', () =>
-    expectStorageTierNotListed(page, storageTier.name),
+  await testStep(
+    'storage-tier-create',
+    `Verify storage tier "${storageTier.name}" does not exist before creation`,
+    () => expectStorageTierNotListed(page, storageTier.name),
   );
 
   await testStep('storage-tier-create', 'Open the storage tier creation form', async () => {
@@ -51,9 +53,13 @@ test('creates a storage tier from Storage > Storage Tiers', async ({ page }) => 
     createStorageTier(page, storageTier),
   );
 
-  await testStep('storage-tier-create', 'Verify the storage tier configuration', async () => {
-    await openStorageTierListPage(page);
-    await expectStorageTierListed(page, storageTier.name);
-    await expectStorageTierConfiguration(page, storageTier);
-  });
+  await testStep(
+    'storage-tier-create',
+    `Verify storage tier "${storageTier.name}" exists after creation`,
+    async () => {
+      await openStorageTierListPage(page);
+      await expectStorageTierListed(page, storageTier.name);
+      await expectStorageTierConfiguration(page, storageTier);
+    },
+  );
 });
